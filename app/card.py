@@ -54,6 +54,14 @@ class Card():
             "text": self.text,
             "effects": [effect.to_json() for effect in self.effects]
         }
+   
+    def of_json(json):
+        return Card(
+            json["manaCost"],
+            json["name"],
+            json["text"],
+            [Effect.of_json(effect) for effect in json["effects"]]
+        )
     
     def starting_wheel():
         channel = Card(0, "Channel", "Gain 1 mana", [Effect(EffectType.MANA, 1)])
@@ -71,9 +79,13 @@ class Card():
 
 
 class Wheel():
-    def __init__(self):
-        self.cards = Card.starting_wheel()
-        self.spin()
+    def __init__(self, cards = None):
+        if cards:
+            assert len(cards) == 10
+            self.cards = cards
+        else:    
+            self.cards = Card.starting_wheel()
+            self.spin()
         
     def play(self, card):
         if (locations := [i for i in range(len(self.cards)) if self.cards[i] == None]):
@@ -89,19 +101,15 @@ class Wheel():
             'cards': [card.to_json() if card else None for card in self.cards],
             'active': self.active
         }
+        
+    def of_json(json):
+        wheel = Wheel([Card.of_json(card) if card else None for card in json['cards']])
+        wheel.active = json['active']
+        return wheel
     
     def active_card(self):
         return self.cards[self.active]
-    
-class Wheels():
-    def __init__(self):
-        self.wheels = {
-            e: Wheel() for e in Element
-        }
-    
-    def get(self, element):
-        return self.wheels[element]
-    
-    def play(self, element, card):
-        return self.wheels[element].play(card)
-    
+
+starting_wheels = {
+    e: Wheel() for e in Element
+}

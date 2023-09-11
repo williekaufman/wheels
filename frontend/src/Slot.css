@@ -1,0 +1,33 @@
+.slot {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  min-width: 100px;
+  /* max-width: 20%; */
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
+
+.slot.highlight {
+  border: 1px solid #0070c7;
+  background-color: red;
+}
+
+.card-name {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 5px;
+}
+
+.mana-cost {
+  float: right;
+  font-size: 1.1rem;
+  color: #0070c7; /* Adjust the color as needed */
+  margin-left: 10px;
+}
+
+.card-text {
+  clear: both;
+  font-size: 1rem;
+  margin-top: 10px;
+}

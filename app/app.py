@@ -6,7 +6,7 @@ from flask_cors import CORS, cross_origin
 from secrets import compare_digest, token_hex
 from redis_utils import rget_json, rset_json, rset, rget
 from player import Player
-from card import Wheels
+from card import starting_wheels
 from cards import cards
 
 app = Flask(__name__)
@@ -28,18 +28,18 @@ def new_game_id():
 
 @app.route("/new_game", methods=["POST"])
 def new_game():
-    game_id = new_game_id()
-    player = Player(cards, Wheels())
+    game_id = request.json.get('gameId') or new_game_id()
+    player = Player(cards, starting_wheels)
     rset_json("player1", player.to_json(), game_id)
     rset_json("player2", player.to_json(), game_id)
     return jsonify({"game_id": game_id})
 
 @app.route("/spin", methods=["POST"])
 def spin():
-    game_id = request.json.get("game_id")
-    player = request.json.get("player")
+    game_id = request.json.get("gameId")
+    playerNum = 'player' + str(request.json.get("player"))
     locks = request.json.get("locks")
-    player = rget_json(player, game_id)
+    player = Player.of_json(rget_json(playerNum, game_id))
     if player is None:
         return make_response(jsonify({"error": "Invalid player"}), 400)
     if locks is None:
@@ -47,5 +47,8 @@ def spin():
     for element, wheel in player.wheels.items():
         if element.value not in locks:
             wheel.spin()
-    rset_json(player, game_id)
-    return jsonify({"player": player}) 
+    rset_json(playerNum, player.to_json(), game_id)
+    return jsonify({"player": player.to_json()})
+
+if __name__ == "__main__":
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)

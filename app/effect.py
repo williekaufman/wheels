@@ -32,6 +32,12 @@ class Effect():
             "type": self.type.value,
             "value": self.value
         }
+        
+    def of_json(json):
+        return Effect(
+            json["type"],
+            json["value"]
+        )
 
     def resolve(self, player, opponent):
         if self.type == EffectType.HEAL:
