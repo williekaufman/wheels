@@ -3,14 +3,18 @@
   border-radius: 5px;
   padding: 10px;
   min-width: 100px;
-  /* max-width: 20%; */
+  height: 50px;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   background-color: #fff;
 }
 
+.slot.lock {
+  background: red;
+}
+
 .slot.highlight {
   border: 1px solid #0070c7;
-  background-color: red;
+  background-color: green;
 }
 
 .card-name {
@@ -22,7 +26,7 @@
 .mana-cost {
   float: right;
   font-size: 1.1rem;
-  color: #0070c7; /* Adjust the color as needed */
+  color: black;
   margin-left: 10px;
 }
 

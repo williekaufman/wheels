@@ -36,12 +36,14 @@ mana_spells = [
 
 cards = []
 
-for config in [burn_spells, healing_spells, block_spells, spell_damage_spells, mana_spells]:
-    for name, mana_cost, value in config[0]:
-        cards.append(Card(
-            mana_cost,
-            name,
-            f"{config[1].value.capitalize()} {value}",
-            [Effect(config[1], value)]
-        ))
- 
+def cards():
+    ret = []
+    for config in [burn_spells, healing_spells, block_spells, spell_damage_spells, mana_spells]:
+        for name, mana_cost, value in config[0]:
+            ret.append(Card(
+                mana_cost,
+                name,
+                f"{config[1].value.capitalize()} {value}",
+                [Effect(config[1], value)]
+            ))
+    return ret 

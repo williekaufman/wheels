@@ -19,7 +19,7 @@ class Player():
             "mana": self.mana,
             "block": self.block,
             "spell_damage": self.spell_damage,
-            "hand": self.hand,
+            "hand": [card.to_json() for card in self.hand],
             "deck": [card.to_json() for card in self.deck],
             "wheels": {e.value: wheel.to_json() for e, wheel in self.wheels.items()}
         }
@@ -37,12 +37,18 @@ class Player():
     
     def draw(self):
         self.deck and self.hand.append(self.deck.pop())
-    
+      
     def new_turn(self):
         self.block = 0
         self.spell_damage = 0
         self.draw()
-        
+   
+    def finish_turn(self, opponent):
+        for wheel in self.wheels.values():
+            wheel.resolve(self, opponent)
+            wheel.spin()
+        self.new_turn()
+       
     def gain_life(self, amount):
         self.life += amount
         

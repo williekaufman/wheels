@@ -1,8 +1,10 @@
 import React from 'react';
 import './Slot.css';
 
-function Slot({ card , highlight }) { 
-    let classNames = highlight ? "slot highlight" : "slot";
+function Slot({ card , highlight , lock }) {
+    let classNames = 'slot';
+    classNames = lock ? classNames + ' lock' : classNames;
+    classNames = highlight ? classNames + ' highlight' : classNames; 
     if (!card) {
         return (
             <div className={classNames}>

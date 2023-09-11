@@ -69,7 +69,7 @@ class Card():
         shield = Card(0, "Shield", "Gain 2 block", [Effect(EffectType.BLOCK, 2)])
         return [channel, channel, channel, fireblast, shield, None, None, None, None, None]
     
-    def play(self, player, opponent):
+    def resolve(self, player, opponent):
         if player.pay_mana(self.mana_cost):
             for effect in self.effects:
                 effect.resolve(player, opponent)
@@ -84,6 +84,7 @@ class Wheel():
             assert len(cards) == 10
             self.cards = cards
         else:    
+            print("Generating new wheel")
             self.cards = Card.starting_wheel()
             self.spin()
         
@@ -110,6 +111,10 @@ class Wheel():
     def active_card(self):
         return self.cards[self.active]
 
-starting_wheels = {
-    e: Wheel() for e in Element
-}
+    def resolve(self, player, opponent):
+        self.active_card() and self.active_card().resolve(player, opponent)
+
+def starting_wheels():
+    return {
+        e: Wheel() for e in Element
+    } 
