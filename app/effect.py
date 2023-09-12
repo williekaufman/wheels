@@ -42,14 +42,19 @@ class Effect():
     def resolve(self, player, opponent):
         if self.type == EffectType.HEAL:
             player.gain_life(self.value)
+            return f"Healed {self.value}"
         elif self.type == EffectType.DAMAGE:
             opponent.take_damage(self.value + player.spell_damage)
+            return f"Dealt {self.value} base, {player.spell_damage} spell damage"
         elif self.type == EffectType.BLOCK:
             player.gain_block(self.value)
+            return f"Blocked for {self.value}"
         elif self.type == EffectType.MANA:
             player.gain_mana(self.value)
+            return f"Gained {self.value} mana"
         elif self.type == EffectType.SPELL_DAMAGE:
             player.gain_spell_damage(self.value)
+            return f"Gained {self.value} spell damage"
    
 class EffectType(Enum):
     HEAL = "heal"

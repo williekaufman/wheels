@@ -64,19 +64,17 @@ class Card():
         )
     
     def starting_wheel():
-        channel = Card(0, "Channel", "Gain 1 mana", [Effect(EffectType.MANA, 1)])
-        fireblast = Card(0, "Fireblast", "Deal 1 damage", [Effect(EffectType.DAMAGE, 1)])
-        shield = Card(0, "Shield", "Gain 2 block", [Effect(EffectType.BLOCK, 2)])
+        channel = Card(0, "Channel", "Mana 1", [Effect(EffectType.MANA, 1)])
+        fireblast = Card(0, "Fireblast", "Damage 1", [Effect(EffectType.DAMAGE, 1)])
+        shield = Card(0, "Shield", "Block 2", [Effect(EffectType.BLOCK, 2)])
         return [channel, channel, channel, fireblast, shield, None, None, None, None, None]
     
     def resolve(self, player, opponent):
+        ret = []
         if player.pay_mana(self.mana_cost):
             for effect in self.effects:
-                effect.resolve(player, opponent)
-            return True
-        else:
-            return False 
-
+                ret.append(effect.resolve(player, opponent))
+        return ret
 
 class Wheel():
     def __init__(self, cards = None):
@@ -84,7 +82,6 @@ class Wheel():
             assert len(cards) == 10
             self.cards = cards
         else:    
-            print("Generating new wheel")
             self.cards = Card.starting_wheel()
             self.spin()
         
@@ -112,7 +109,10 @@ class Wheel():
         return self.cards[self.active]
 
     def resolve(self, player, opponent):
-        self.active_card() and self.active_card().resolve(player, opponent)
+        if self.active_card():
+            return ','.join(self.active_card().resolve(player, opponent))
+        else:
+            return 'Empty card'
 
 def starting_wheels():
     return {

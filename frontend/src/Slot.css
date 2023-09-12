@@ -2,10 +2,17 @@
   border: 1px solid #ccc;
   border-radius: 5px;
   padding: 10px;
-  min-width: 100px;
-  height: 50px;
+  min-width: 200px;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   background-color: #fff;
+}
+
+.slot.basic {
+  background: white;
+}
+
+.slot.empty {
+  background: gray;
 }
 
 .slot.lock {
@@ -13,8 +20,9 @@
 }
 
 .slot.highlight {
-  border: 1px solid #0070c7;
+  border: 4px solid #0070c7;
   background-color: green;
+  box-sizing: border-box;
 }
 
 .card-name {

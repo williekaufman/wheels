@@ -3,14 +3,14 @@ from card import Card, Element, Wheel
 
 class Player():
     def __init__(self, deck, wheels, life=20, mana=0, block=0, spell_damage=0, hand=[]):
-        deck = deck.copy()
+        deck = [card for card in deck]
         random.shuffle(deck)
-        self.wheels = wheels
-        self.life = 20
-        self.mana = 0
-        self.block = 0
-        self.spell_damage = 0
-        self.hand = []
+        self.wheels = wheels.copy()
+        self.life = life
+        self.mana = mana
+        self.block = block
+        self.spell_damage = spell_damage
+        self.hand = [card for card in hand]
         self.deck = deck
    
     def to_json(self):
@@ -35,8 +35,13 @@ class Player():
             [Card.of_json(card) for card in json["hand"]]
         )
     
-    def draw(self):
-        self.deck and self.hand.append(self.deck.pop())
+    def play(self, wheel, card_index):
+        if self.wheels[wheel].play(self.hand[card_index]):
+            self.hand = self.hand[:card_index] + self.hand[card_index + 1:]
+    
+    def draw(self, n = 1):
+        for i in range(n):
+            self.deck and self.hand.append(self.deck.pop())
       
     def new_turn(self):
         self.block = 0
@@ -44,10 +49,12 @@ class Player():
         self.draw()
    
     def finish_turn(self, opponent):
+        log = []
         for wheel in self.wheels.values():
-            wheel.resolve(self, opponent)
+            log.append(wheel.resolve(self, opponent))
             wheel.spin()
         self.new_turn()
+        return log
        
     def gain_life(self, amount):
         self.life += amount
