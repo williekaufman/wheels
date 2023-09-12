@@ -237,7 +237,7 @@ function Hand({ playerState , activeCardIndex, setActiveCardIndex }) {
     }
 
     return (
-        <Grid container spacing={2}>
+        <Grid container spacing={2} style={{ width: '864px'}}>
             {hand.map((card, index) => (
                 <Grid item key={index}>
                     <Slot 
@@ -353,8 +353,8 @@ export default function GamePage() {
 
     return (
         <div>
-            <NewGameButton setSpins={setSpins} setGameId={setGameId} setPlayerState={setPlayerState} setOpponentState={setOpponentState} setActiveCardIndex={setActiveCardIndex} appendToLog={appendToLog}/>
-            <Grid container direction="row">
+            {/* <NewGameButton setSpins={setSpins} setGameId={setGameId} setPlayerState={setPlayerState} setOpponentState={setOpponentState} setActiveCardIndex={setActiveCardIndex} appendToLog={appendToLog}/> */}
+            <Grid container direction="row" style={{marginTop: '10px'}}>
                 <Grid item>
                     <SpinButton 
                     spins={spins} 
@@ -388,7 +388,7 @@ export default function GamePage() {
                     activeCardIndex={activeCardIndex} 
                     setActiveCardIndex={setActiveCardIndex}/>
                 </Grid>
-                <Grid item>
+                <Grid item style={{marginBottom: '30px'}}>
                     <Hand 
                     playerState={playerState} 
                     activeCardIndex={activeCardIndex} 

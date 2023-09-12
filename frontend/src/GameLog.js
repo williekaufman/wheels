@@ -6,7 +6,7 @@ function GameLog({ log }) {
     <Paper elevation={3} style={{ position: 'absolute', bottom: '10px', left: '10px', width: '400px', height: '400px', overflowY: 'scroll' }}>
       <ul>
         <p> Game Log </p>
-        {log.map((message, index) => (
+        {[...log].reverse().map((message, index) => (
           <li key={index}>{message}</li>
         ))}
       </ul>
