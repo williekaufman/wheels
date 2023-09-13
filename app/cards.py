@@ -44,7 +44,7 @@ multiple_effects_cards = [
             Effect(EffectType.HEAL, 2),
             Effect(EffectType.DAMAGE, 2)
         ],
-        []
+        [Element.WATER]
     )
 ]
 
