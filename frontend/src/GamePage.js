@@ -463,7 +463,7 @@ export default function GamePage() {
     const socket = useSocket();
 
     const [log, setLog] = useState([]);
-    const [showLog, setShowLog] = useState(true);
+    const [showLog, setShowLog] = useState(false);
     const [error, setError] = useState(null);
 
     const [submitted, setSubmitted] = useState(false);

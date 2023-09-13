@@ -29,7 +29,8 @@ class Element(Enum):
             effect.synergy = True 
         
     def adjust_card(self, card):
-        if self == Element.AIR:
+        if self == Element.AIR and card.mana_cost > 0:
             card.mana_cost -= 1
-        for effect in card.effects:
-            self.adjust_effect(effect)
+        else:
+            for effect in card.effects:
+                self.adjust_effect(effect)
