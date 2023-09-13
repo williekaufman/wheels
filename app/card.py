@@ -64,9 +64,9 @@ class Card():
         )
     
     def starting_wheel():
-        channel = Card(0, "Channel", "Mana 1", [Effect(EffectType.MANA, 1)])
-        fireblast = Card(0, "Fireblast", "Damage 1", [Effect(EffectType.DAMAGE, 1)])
-        shield = Card(0, "Shield", "Block 2", [Effect(EffectType.BLOCK, 2)])
+        channel = Card(0, "Channel", "1 (Mana)", [Effect(EffectType.MANA, 1)])
+        fireblast = Card(0, "Fireblast", "1 (Damage)", [Effect(EffectType.DAMAGE, 1)])
+        shield = Card(0, "Shield", "2 (Block)", [Effect(EffectType.BLOCK, 2)])
         return [channel, channel, channel, fireblast, shield, None, None, None, None, None]
     
     def resolve(self, player, opponent):

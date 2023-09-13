@@ -43,7 +43,7 @@ def cards():
             ret.append(Card(
                 mana_cost,
                 name,
-                f"{config[1].value.capitalize()} {value}",
+                f"{value} ({config[1].value.capitalize()})", 
                 [Effect(config[1], value)]
             ))
     return ret 

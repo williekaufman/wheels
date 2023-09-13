@@ -10,8 +10,12 @@ import DialogTitle from '@mui/material/DialogTitle';
 import GameInfo from './GameInfo';
 import GameLog from './GameLog';
 import './GamePage.css';
+import { useSocket } from './SocketContext';
+import Toast from './Toast';
+import { useLocation, useParams , useNavigate } from 'react-router-dom';
+import Typography from '@mui/material/Typography';
 
-const elements = ['fire', 'water', 'earth', 'air'];
+const elements = ['air', 'earth', 'fire', 'water'];
 
 function makeRequestOptions(body, method = 'POST') {
     if (method === 'GET') {
@@ -43,38 +47,25 @@ function fetchWrapper(url, body, method = 'POST') {
     });
 }
 
-function newGame(setSpins, setGameId, setPlayerState, setActiveCardIndex, setOpponentState, appendToLog) {
-    fetchWrapper(`${URL}/new_game`, {}, 'POST')
+function newGame(navigate) {
+    return fetchWrapper(`${URL}/new_game`, {}, 'POST')
         .then((res) => res.json())
         .then((data) => {
-            setActiveCardIndex(null);
-            setGameId(data['gameId']);
-            setPlayerState(data['player']);
-            setOpponentState(data['opponent']);
-            setSpins(3);
-            appendToLog('New game started with id ' + data['gameId'])
+            if (data['error']) {
+                console.log(data['error']);
+                return;
+            }
+            navigate(`/game/${data['gameId']}?playerNum=1`);
+            window.location.reload();
         }
-        );
+    );
 }
 
-function NewGameButton({ setSpins, setGameId, setPlayerState , setActiveCardIndex , setOpponentState , appendToLog }) {
-    function handleClick(e) {
-        e.preventDefault();
-        newGame(setSpins, setGameId, setPlayerState, setActiveCardIndex, setOpponentState, appendToLog);
-    }
-
-    return (
-        <div>
-            <Button onClick={handleClick}>New Game</Button>
-        </div>
-    )
-}
-
-function spin(spins, setSpins, gameId, locks, playerNum, setPlayerState) {
+function spin(gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlayerState) {
     if (spins < 1) {
         return;
     }
-    
+
     let locksArg = elements.filter((element) => {
         return locks[element];
     });
@@ -82,42 +73,64 @@ function spin(spins, setSpins, gameId, locks, playerNum, setPlayerState) {
     fetchWrapper(`${URL}/spin`, { 'gameId': gameId, 'player': playerNum, 'locks': locksArg }, 'POST')
         .then((res) => res.json())
         .then((data) => {
+            if (data['error']) {
+                showErrorToast(data['error']);
+                return;
+            }
             setPlayerState(data['player']);
             setSpins(spins - 1);
         }
         );
 }
 
-
-function SpinButton({ spins, setSpins, gameId, locks, playerNum, setPlayerState }) {
+function SpinButton({ gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlayerState, submitted }) {
     function handleClick(e) {
         e.preventDefault();
-        spin(spins, setSpins, gameId, locks, playerNum, setPlayerState)
+        spin(gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlayerState);
     }
 
     return (
-        <Button variant="contained" color="primary" disabled={spins <= 0} onClick={handleClick}>
+        <Button variant="contained" color="primary" disabled={spins <= 0 || submitted} onClick={handleClick}>
             {`Spin (${spins})`}
         </Button>
     )
 }
 
-function submitTurn(gameId, appendToLog, setPlayerState, setLocks, setOpponentState, setSpins) {
-    fetchWrapper(`${URL}/submit`, { 'gameId': gameId, 'player': 1 }, 'POST')
+function updateState(gameId, playerNum, showErrorToast, setResult, setLog, setPlayerState, setOpponentState, setSpins, setSubmitted) {
+    fetchWrapper(`${URL}/state`, { 'gameId': gameId, 'player': playerNum }, 'GET')
         .then((res) => res.json())
         .then((data) => {
+            if (data['error']) {
+                showErrorToast(data['error']);
+                return;
+            }
             setPlayerState(data['player']);
-            setOpponentState(data['opponent']);
-            elements.forEach((element) => {
-                setLocks[element](false);
-            })
-            setSpins(3);
-            appendToLog(data['log'])
+            setOpponentState(data['opponent']); 
+            setSpins(data['player']['spins']);
+            setSubmitted(data['submitted']);
+            setLog(data['log']);
+            data['result'] && setResult(data['result']);
         }
         );
 }
 
-function SubmitButton({ gameId, appendToLog, setPlayerState, setLocks, setOpponentState, setSpins }) {
+function submitTurn(gameId, playerNum, showErrorToast, setLocks, setSubmitted) {
+    fetchWrapper(`${URL}/submit`, { 'gameId': gameId, 'player': playerNum }, 'POST')
+        .then((res) => res.json())
+        .then((data) => {
+            if (data['error']) {
+                showErrorToast(data['error']);
+                return;
+            }
+            elements.forEach((element) => {
+                setLocks[element](false);
+            })
+            setSubmitted(true);
+        }
+        );
+}
+
+function SubmitButton({ gameId, playerNum, showErrorToast, setLog, setLocks, submitted , setSubmitted }) {
     const [open, setOpen] = useState(false);
 
     const handleClickOpen = () => {
@@ -130,7 +143,7 @@ function SubmitButton({ gameId, appendToLog, setPlayerState, setLocks, setOppone
 
     const handleConfirm = () => {
         setOpen(false);
-        submitTurn(gameId, appendToLog, setPlayerState, setLocks, setOpponentState, setSpins);
+        submitTurn(gameId, playerNum, showErrorToast, setLocks, setSubmitted);
     };
 
     const handleKeyDown = (e) => {
@@ -149,7 +162,7 @@ function SubmitButton({ gameId, appendToLog, setPlayerState, setLocks, setOppone
 
     return (
         <div>
-            <Button variant="contained" color="primary" onClick={handleClickOpen} style={{ marginLeft: '10px' }}>
+            <Button variant="contained" color="primary" disabled={submitted} onClick={handleClickOpen} style={{ marginLeft: '10px' }}>
                 Submit
             </Button>
             <Dialog open={open} onClose={handleClose}>
@@ -177,13 +190,15 @@ function SubmitButton({ gameId, appendToLog, setPlayerState, setLocks, setOppone
 
 function Wheel({
     gameId,
+    showErrorToast,
     playerState,
     setPlayerState,
     element,
     lock,
     setLock,
     activeCardIndex,
-    setActiveCardIndex
+    setActiveCardIndex,
+    playerNum
 }) {
     if (!playerState) {
         return (
@@ -193,21 +208,25 @@ function Wheel({
 
     function onClick() {
         if (activeCardIndex != null) {
-            fetchWrapper(`${URL}/play`, { 'gameId': gameId, 'player': 1, 'wheel': element, 'cardIndex': activeCardIndex }, 'POST')
+            fetchWrapper(`${URL}/play`, { 'gameId': gameId, 'player': playerNum, 'wheel': element, 'cardIndex': activeCardIndex }, 'POST')
                 .then((res) => res.json())
                 .then((data) => {
+                    if (data['error']) {
+                        showErrorToast(data['error']);
+                        return;
+                    }
                     setPlayerState(data['player']);
                     setActiveCardIndex(null);
                 }
-            );
+                );
         }
     }
 
     const wheel = playerState['wheels'][element];
 
     return (
-        <div>
-            <Button variant={lock ? "contained" : ""} style={{width: '100%'}} onClick={() => setLock(!lock)}>{lock ? 'unlock' : 'lock'}</Button>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Button variant={lock ? "contained" : ""} style={{ width: '100%' }} onClick={() => setLock(!lock)}>{lock ? 'unlock' : 'lock'} {element}</Button>
             {wheel['cards'].map((card, index) => (
                 <Slot card={card} key={index} lock={lock} basic={index < 5} highlight={index === wheel['active']} onClick={() => onClick()} />
             ))}
@@ -215,7 +234,7 @@ function Wheel({
     )
 }
 
-function Hand({ playerState , activeCardIndex, setActiveCardIndex }) {
+function Hand({ playerState, activeCardIndex, setActiveCardIndex }) {
     if (!playerState) {
         return (
             null
@@ -237,16 +256,16 @@ function Hand({ playerState , activeCardIndex, setActiveCardIndex }) {
     }
 
     return (
-        <Grid container spacing={2} style={{ width: '864px'}}>
+        <Grid container spacing={2} style={{ width: '864px' }}>
             {hand.map((card, index) => (
                 <Grid item key={index}>
-                    <Slot 
-                    card={card}
-                    key={index}
-                    lock={false}
-                    basic={false}
-                    highlight={highlight(index)}
-                    onClick={() => onClick(index)}
+                    <Slot
+                        card={card}
+                        key={index}
+                        lock={false}
+                        basic={false}
+                        highlight={highlight(index)}
+                        onClick={() => onClick(index)}
                     />
                 </Grid>
             ))}
@@ -256,14 +275,16 @@ function Hand({ playerState , activeCardIndex, setActiveCardIndex }) {
     return (<div> </div>)
 }
 
-function Wheels({ 
+function Wheels({
     gameId,
-    locks, 
-    setLocks, 
+    showErrorToast,
+    locks,
+    setLocks,
     playerState,
     setPlayerState,
     activeCardIndex,
-    setActiveCardIndex
+    setActiveCardIndex,
+    playerNum
 }) {
     if (!playerState) {
         return null
@@ -275,6 +296,7 @@ function Wheels({
                 <Grid item key={index}>
                     <Wheel
                         gameId={gameId}
+                        showErrorToast={showErrorToast}
                         playerState={playerState}
                         element={element}
                         lock={locks[element]}
@@ -282,13 +304,32 @@ function Wheels({
                         setPlayerState={setPlayerState}
                         activeCardIndex={activeCardIndex}
                         setActiveCardIndex={setActiveCardIndex}
+                        playerNum={playerNum}
                     />
                 </Grid>
             ))}
         </Grid>
     )
-
 }
+
+function ResultBanner({ result , playerNum }) {
+  if (!result) {
+    return null;
+  }
+
+  let desired = (playerNum === 1) ? 'Player One Wins': 'Player Two Wins';
+  
+  let color = (result === desired) ? 'green' : 'red';
+
+  console.log(desired, result);
+
+  return (
+    <div className="result-banner" style={{ backgroundColor: color }}>
+      <p>{result}</p>
+    </div>
+  );
+}
+
 
 export default function GamePage() {
     const [airLock, setAirLock] = useState(false);
@@ -298,20 +339,37 @@ export default function GamePage() {
 
     const [spins, setSpins] = useState(3);
 
-    const [playerNum, setPlayerNum] = useState(
-        1
-    )
+    const location = useLocation();
+
+    const { game } = useParams();
+    const navigate = useNavigate();
+   
+    const queryParams = new URLSearchParams(location.search);
+    const playerNum = queryParams.get('playerNum') === "2" ? 2 : 1;
+
+    
     const [playerState, setPlayerState] = useState();
     const [opponentState, setOpponentState] = useState();
-
-    const [gameId, setGameId] = useState();
+    const [result, setResult] = useState();
+    
+    const [gameId, setGameId] = useState(game);
     const [activeCardIndex, setActiveCardIndex] = useState();
 
-    const [log, setLog] = useState([]);
+    const socket = useSocket();
 
-    const appendToLog = (message) => {
-        setLog(log.concat(message));
-    }
+    const [log, setLog] = useState([]);
+    const [showLog, setShowLog] = useState(true);
+    const [error, setError] = useState(null);
+
+    const [submitted, setSubmitted] = useState(false);
+
+    const showErrorToast = (message) => {
+        setError(message);
+
+        setTimeout(() => {
+            setError(null);
+        }, 5000);
+    };
 
     let locks = {
         'air': airLock,
@@ -327,21 +385,44 @@ export default function GamePage() {
         'water': setWaterLock,
     }
 
+    function onClose() {
+        gameId && socket.emit('leave', { room: gameId })
+    }
+
     useEffect(() => {
-        newGame(setSpins, setGameId, setPlayerState, setActiveCardIndex, setOpponentState, appendToLog);
-    }, []);
+        if (!socket) return;
+
+        socket.on('connect', () => {
+            gameId && socket.emit('join', { room: gameId })
+        });
+
+        socket.on('update', () => {
+            console.log(gameId, 'updating');
+            updateState(gameId, playerNum, showErrorToast, setResult, setLog, setPlayerState, setOpponentState, setSpins, setSubmitted);
+        })
+
+        return onClose
+    }, [socket]);
+
+    useEffect(() => { 
+        if (gameId) {
+            updateState(gameId, playerNum, showErrorToast, setResult, setLog, setPlayerState, setOpponentState, setSpins, setSubmitted); 
+        } else {
+            newGame(navigate)
+        }
+    }, [gameId]);
 
     useEffect(() => {
         const f = (e) => {
             if (e.ctrlKey && e.key === 'Enter') {
-                submitTurn(gameId, appendToLog, setPlayerState, setLocks, setOpponentState, setSpins);
+                submitTurn(gameId, playerNum, showErrorToast, setLocks, setSubmitted);
             } if (e.shiftKey) {
                 if (e.key === 'S') {
-                    spin(spins, setSpins, gameId, locks, playerNum, setPlayerState)
-                } else if (e.key === 'N') {
-                    newGame(setSpins, setGameId, setPlayerState, setActiveCardIndex, setOpponentState, appendToLog);
+                    spin(gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlayerState);
+                } if (e.key === 'L') {
+                    setShowLog(!showLog);
                 }
-            } 
+            }
         }
 
         document.addEventListener('keydown', f);
@@ -353,49 +434,59 @@ export default function GamePage() {
 
     return (
         <div>
-            {/* <NewGameButton setSpins={setSpins} setGameId={setGameId} setPlayerState={setPlayerState} setOpponentState={setOpponentState} setActiveCardIndex={setActiveCardIndex} appendToLog={appendToLog}/> */}
-            <Grid container direction="row" style={{marginTop: '10px'}}>
+            <ResultBanner result={result} playerNum={playerNum}/>
+            <Grid container direction="row" style={{ marginTop: '10px' }}>
                 <Grid item>
-                    <SpinButton 
-                    spins={spins} 
-                    setSpins={setSpins} 
-                    locks={locks} 
-                    gameId={gameId} 
-                    playerNum={playerNum} 
-                    setPlayerState={setPlayerState} />
+                    <SpinButton
+                        gameId={gameId}
+                        playerNum={playerNum}
+                        showErrorToast={showErrorToast}
+                        spins={spins}
+                        setSpins={setSpins}
+                        locks={locks}
+                        setPlayerState={setPlayerState} 
+                        submitted={submitted}
+                        />
                 </Grid>
                 <Grid item>
-                    <SubmitButton 
-                    gameId={gameId}
-                    log={log}
-                    appendToLog={appendToLog}
-                    setLocks={setLocks}
-                    setPlayerState={setPlayerState}
-                    setOpponentState={setOpponentState}
-                    setSpins={setSpins} 
+                    <SubmitButton
+                        gameId={gameId}
+                        playerNum={playerNum}
+                        showErrorToast={showErrorToast}
+                        setLog={setLog}
+                        setLocks={setLocks}
+                        setPlayerState={setPlayerState}
+                        setOpponentState={setOpponentState}
+                        setSpins={setSpins}
+                        submitted={submitted}
+                        setSubmitted={setSubmitted}
                     />
                 </Grid>
             </Grid >
-            <GameInfo playerState={playerState} opponentState={opponentState}/>
+            <GameInfo playerState={playerState} opponentState={opponentState} />
             <Grid container direction="column" className="cards-container" spacing={2}>
                 <Grid item>
-                    <Wheels 
-                    gameId={gameId}
-                    locks={locks} 
-                    setLocks={setLocks} 
-                    playerState={playerState} 
-                    setPlayerState={setPlayerState}
-                    activeCardIndex={activeCardIndex} 
-                    setActiveCardIndex={setActiveCardIndex}/>
+                    <Wheels
+                        gameId={gameId}
+                        showErrorToast={showErrorToast}
+                        locks={locks}
+                        setLocks={setLocks}
+                        playerState={playerState}
+                        setPlayerState={setPlayerState}
+                        activeCardIndex={activeCardIndex}
+                        setActiveCardIndex={setActiveCardIndex} 
+                        playerNum={playerNum}
+                        />
                 </Grid>
-                <Grid item style={{marginBottom: '30px'}}>
-                    <Hand 
-                    playerState={playerState} 
-                    activeCardIndex={activeCardIndex} 
-                    setActiveCardIndex={setActiveCardIndex}/>
+                <Grid item style={{ marginBottom: '30px' }}>
+                    <Hand
+                        playerState={playerState}
+                        activeCardIndex={activeCardIndex}
+                        setActiveCardIndex={setActiveCardIndex} />
                 </Grid>
             </Grid>
-            <GameLog log={log} />
+            {showLog && <GameLog log={log} />}
+            {error && <Toast message={error} onClose={() => setError(null)} />}
         </div >
     )
 }

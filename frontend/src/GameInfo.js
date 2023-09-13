@@ -9,8 +9,8 @@ function GameInfo({ playerState, opponentState }) {
     }
 
     const paragraphStyle = {
-        margin: '2px 0',
-        padding: '2px 0',
+        margin: '0px 0',
+        padding: '0px 0',
     };
 
 
@@ -32,6 +32,7 @@ function GameInfo({ playerState, opponentState }) {
           </div>
           <div style={{width: '33%', textAlign: 'center'}}>
             <p style={paragraphStyle}>Opponent</p>
+            <p style={paragraphStyle}>Cards in hand: {opponentState['hand'].length}</p>
             <p style={paragraphStyle}>Mana: {opponentState['mana']}</p>
             <p style={paragraphStyle}>Health: {opponentState['life']}</p>
           </div>

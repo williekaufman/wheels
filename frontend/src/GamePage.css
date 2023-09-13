@@ -5,3 +5,12 @@
   align-items: center;
   width: 100%;
 }
+
+.result-banner {
+  background-color: #28a745; 
+  color: #fff; 
+  padding: 10px; 
+  text-align: center; 
+  font-size: 18px; 
+  font-weight: bold; 
+}

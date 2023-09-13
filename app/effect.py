@@ -44,8 +44,8 @@ class Effect():
             player.gain_life(self.value)
             return f"Healed {self.value}"
         elif self.type == EffectType.DAMAGE:
-            opponent.take_damage(self.value + player.spell_damage)
-            return f"Dealt {self.value} base, {player.spell_damage} spell damage"
+            blocked_damage = opponent.take_damage(self.value + player.spell_damage)
+            return f"Dealt {self.value} base, {player.spell_damage} spell damage, of which {blocked_damage} was blocked"
         elif self.type == EffectType.BLOCK:
             player.gain_block(self.value)
             return f"Blocked for {self.value}"
