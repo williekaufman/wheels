@@ -12,7 +12,7 @@ import GameLog from './GameLog';
 import './GamePage.css';
 import { useSocket } from './SocketContext';
 import Toast from './Toast';
-import { useLocation, useParams , useNavigate } from 'react-router-dom';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import Typography from '@mui/material/Typography';
 
 const elements = ['air', 'earth', 'fire', 'water'];
@@ -58,11 +58,11 @@ function newGame(navigate) {
             navigate(`/game/${data['gameId']}?playerNum=1`);
             window.location.reload();
         }
-    );
+        );
 }
 
-function spin(gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlayerState) {
-    if (spins < 1) {
+function spin(opponentView, gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlayerState) {
+    if (spins < 1 || opponentView) {
         return;
     }
 
@@ -83,10 +83,10 @@ function spin(gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlay
         );
 }
 
-function SpinButton({ gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlayerState, submitted , result }) {
+function SpinButton({ opponentView, gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlayerState, submitted, result }) {
     function handleClick(e) {
         e.preventDefault();
-        spin(gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlayerState);
+        spin(opponentView, gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlayerState);
     }
 
     return (
@@ -105,7 +105,7 @@ function updateState(gameId, playerNum, showErrorToast, setResult, setLog, setPl
                 return;
             }
             setPlayerState(data['player']);
-            setOpponentState(data['opponent']); 
+            setOpponentState(data['opponent']);
             setSpins(data['player']['spins']);
             setSubmitted(data['submitted']);
             setLog(data['log']);
@@ -130,7 +130,7 @@ function submitTurn(gameId, playerNum, showErrorToast, setLocks, setSubmitted) {
         );
 }
 
-function SubmitButton({ gameId, playerNum, showErrorToast, setLocks, submitted , setSubmitted , result }) {
+function SubmitButton({ gameId, playerNum, showErrorToast, setLocks, submitted, setSubmitted, result }) {
     const [open, setOpen] = useState(false);
 
     const handleClickOpen = () => {
@@ -162,7 +162,7 @@ function SubmitButton({ gameId, playerNum, showErrorToast, setLocks, submitted ,
 
     return (
         <div>
-            <Button variant="contained" color="primary" disabled={submitted || result} onClick={handleClickOpen} style={{ marginLeft: '10px' }}>
+            <Button variant="contained" color="primary" disabled={submitted || result} onClick={handleClickOpen}>
                 Submit
             </Button>
             <Dialog open={open} onClose={handleClose}>
@@ -189,9 +189,11 @@ function SubmitButton({ gameId, playerNum, showErrorToast, setLocks, submitted ,
 }
 
 function Wheel({
+    opponentView,
     gameId,
     showErrorToast,
     playerState,
+    opponentState,
     setPlayerState,
     element,
     lock,
@@ -208,7 +210,7 @@ function Wheel({
     }
 
     function onClick() {
-        if (activeCardIndex != null && !result) {
+        if (activeCardIndex != null && !result && !opponentView) {
             fetchWrapper(`${URL}/play`, { 'gameId': gameId, 'player': playerNum, 'wheel': element, 'cardIndex': activeCardIndex }, 'POST')
                 .then((res) => res.json())
                 .then((data) => {
@@ -223,7 +225,7 @@ function Wheel({
         }
     }
 
-    const wheel = playerState['wheels'][element];
+    const wheel = (opponentView ? opponentState : playerState)['wheels'][element];
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -277,11 +279,13 @@ function Hand({ playerState, activeCardIndex, setActiveCardIndex }) {
 }
 
 function Wheels({
+    opponentView,
     gameId,
     showErrorToast,
     locks,
     setLocks,
     playerState,
+    opponentState,
     setPlayerState,
     activeCardIndex,
     setActiveCardIndex,
@@ -297,9 +301,11 @@ function Wheels({
             {elements.map((element, index) => (
                 <Grid item key={index}>
                     <Wheel
+                        opponentView={opponentView}
                         gameId={gameId}
                         showErrorToast={showErrorToast}
                         playerState={playerState}
+                        opponentState={opponentState}
                         element={element}
                         lock={locks[element]}
                         setLock={setLocks[element]}
@@ -315,24 +321,108 @@ function Wheels({
     )
 }
 
-function ResultBanner({ result , playerNum }) {
-  if (!result) {
-    return null;
-  }
+function ResultBanner({ result, playerNum }) {
+    if (!result) {
+        return null;
+    }
 
-  let desired = (playerNum === 1) ? 'Player One Wins': 'Player Two Wins';
-  
-  let color = (result === desired) ? 'green' : 'red';
+    let desired = (playerNum === 1) ? 'Player One Wins' : 'Player Two Wins';
 
-  console.log(desired, result);
+    let color = (result === desired) ? 'green' : 'red';
 
-  return (
-    <div className="result-banner" style={{ backgroundColor: color }}>
-      <p>{result}</p>
-    </div>
-  );
+    console.log(desired, result);
+
+    return (
+        <div className="result-banner" style={{ backgroundColor: color }}>
+            <p>{result}</p>
+        </div>
+    );
 }
 
+function LeftAlignedButtons({
+    gameId,
+    playerNum,
+    showErrorToast,
+    spins,
+    setSpins,
+    locks,
+    setLocks,
+    setPlayerState,
+    setOpponentState,
+    submitted,
+    result,
+    setSubmitted,
+    opponentView,
+    setOpponentView
+}) {
+    return (
+        <Grid container direction="row" spacing={2}>
+            <Grid item>
+                <SpinButton
+                    gameId={gameId}
+                    playerNum={playerNum}
+                    showErrorToast={showErrorToast}
+                    spins={spins}
+                    setSpins={setSpins}
+                    locks={locks}
+                    setPlayerState={setPlayerState}
+                    submitted={submitted}
+                    result={result}
+                />
+            </Grid>
+            <Grid item>
+                <SubmitButton
+                    gameId={gameId}
+                    playerNum={playerNum}
+                    showErrorToast={showErrorToast}
+                    setLocks={setLocks}
+                    setPlayerState={setPlayerState}
+                    setOpponentState={setOpponentState}
+                    setSpins={setSpins}
+                    submitted={submitted}
+                    setSubmitted={setSubmitted}
+                    result={result}
+                />
+            </Grid>
+            <Grid item>
+                <Button variant={opponentView ? "contained" : ""} color={opponentView ? "primary" : ""} onClick={() => setOpponentView(!opponentView)} style={{ marginLeft: '10px' }}>
+                    {opponentView ? 'View Your' : 'View Opponent\'s'} Wheels
+                </Button>
+            </Grid>
+        </Grid>
+    );
+}
+
+const copyToClipboard = (str) => {
+    const el = document.createElement('textarea');
+    el.value = str;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+};
+
+function RightAlignedButtons({ navigate, showLog, setShowLog, showErrorToast }) {
+    return (
+        <Grid container direction="row" spacing={2} style={{marginRight: '20px' }}>
+            <Grid item>
+                <Button variant="contained" color="primary" onClick={() => showErrorToast('asdf')}>
+                    Copy link
+                </Button>
+            </Grid>
+            <Grid item>
+                <Button variant={showLog ? "contained" : ""} color={showLog ? "primary" : ""} onClick={() => setShowLog(!showLog)}>
+                    {showLog ? 'Hide' : 'Show'} Log
+                </Button>
+            </Grid>
+            <Grid item>
+                <Button variant="contained" color="primary" onClick={() => newGame(navigate)} >
+                    New Game
+                </Button>
+            </Grid>
+        </Grid>
+    );
+}
 
 export default function GamePage() {
     const [airLock, setAirLock] = useState(false);
@@ -346,15 +436,15 @@ export default function GamePage() {
 
     const { game } = useParams();
     const navigate = useNavigate();
-   
+
     const queryParams = new URLSearchParams(location.search);
     const playerNum = queryParams.get('playerNum') === "2" ? 2 : 1;
 
-    
+
     const [playerState, setPlayerState] = useState();
     const [opponentState, setOpponentState] = useState();
     const [result, setResult] = useState();
-    
+
     const [gameId, setGameId] = useState(game);
     const [activeCardIndex, setActiveCardIndex] = useState();
 
@@ -365,6 +455,7 @@ export default function GamePage() {
     const [error, setError] = useState(null);
 
     const [submitted, setSubmitted] = useState(false);
+    const [opponentView, setOpponentView] = useState(false);
 
     const showErrorToast = (message) => {
         setError(message);
@@ -407,9 +498,9 @@ export default function GamePage() {
         return onClose
     }, [socket]);
 
-    useEffect(() => { 
+    useEffect(() => {
         if (gameId) {
-            updateState(gameId, playerNum, showErrorToast, setResult, setLog, setPlayerState, setOpponentState, setSpins, setSubmitted); 
+            updateState(gameId, playerNum, showErrorToast, setResult, setLog, setPlayerState, setOpponentState, setSpins, setSubmitted);
         } else {
             newGame(navigate)
         }
@@ -421,7 +512,7 @@ export default function GamePage() {
                 submitTurn(gameId, playerNum, showErrorToast, setLocks, setSubmitted);
             } if (e.shiftKey) {
                 if (e.key === 'S') {
-                    spin(gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlayerState);
+                    spin(opponentView, gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlayerState);
                 } if (e.key === 'L') {
                     setShowLog(!showLog);
                 }
@@ -437,51 +528,47 @@ export default function GamePage() {
 
     return (
         <div>
-            <ResultBanner result={result} playerNum={playerNum}/>
-            <Grid container direction="row" style={{ marginTop: '10px' }}>
+            <ResultBanner result={result} playerNum={playerNum} />
+            <Grid container direction="row" style={{ marginTop: '10px', marginLeft: '10px', justifyContent: 'space-between' }}>
                 <Grid item>
-                    <SpinButton
+                    <LeftAlignedButtons
                         gameId={gameId}
                         playerNum={playerNum}
                         showErrorToast={showErrorToast}
                         spins={spins}
                         setSpins={setSpins}
                         locks={locks}
-                        setPlayerState={setPlayerState} 
-                        submitted={submitted}
-                        result={result}
-                        />
-                </Grid>
-                <Grid item>
-                    <SubmitButton
-                        gameId={gameId}
-                        playerNum={playerNum}
-                        showErrorToast={showErrorToast}
                         setLocks={setLocks}
                         setPlayerState={setPlayerState}
                         setOpponentState={setOpponentState}
-                        setSpins={setSpins}
                         submitted={submitted}
-                        setSubmitted={setSubmitted}
                         result={result}
+                        setSubmitted={setSubmitted}
+                        opponentView={opponentView}
+                        setOpponentView={setOpponentView}
                     />
+                </Grid>
+                <Grid item>
+                    <RightAlignedButtons navigate={navigate} showLog={showLog} setShowLog={setShowLog} showErrorToast={showErrorToast}/>
                 </Grid>
             </Grid >
             <GameInfo playerState={playerState} opponentState={opponentState} />
             <Grid container direction="column" className="cards-container" spacing={2}>
                 <Grid item>
                     <Wheels
+                        opponentView={opponentView}
                         gameId={gameId}
                         showErrorToast={showErrorToast}
                         locks={locks}
                         setLocks={setLocks}
                         playerState={playerState}
+                        opponentState={opponentState}
                         setPlayerState={setPlayerState}
                         activeCardIndex={activeCardIndex}
-                        setActiveCardIndex={setActiveCardIndex} 
+                        setActiveCardIndex={setActiveCardIndex}
                         playerNum={playerNum}
                         result={result}
-                        />
+                    />
                 </Grid>
                 <Grid item style={{ marginBottom: '30px' }}>
                     <Hand

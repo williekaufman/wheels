@@ -16,16 +16,16 @@ healing_spells = [
 ], EffectType.HEAL
 
 block_spells = [
-    ("Block", 0, 1),
-    ("Block II", 2, 3),
-    ("Block III", 4, 5),
-    ("Block IV", 6, 8),
+    ("Wall", 0, 1),
+    ("Wall II", 2, 3),
+    ("Wall III", 4, 5),
+    ("Wall IV", 6, 8),
 ], EffectType.BLOCK
 
 spell_damage_spells = [
-    ("Spell Damage", 0, 1),
-    ("Spell Damage II", 2, 2),
-    ("Spell Damage III", 4, 3),
+    ("Focus", 0, 1),
+    ("Focus II", 2, 2),
+    ("Focus III", 4, 3),
 ], EffectType.SPELL_DAMAGE
 
 mana_spells = [
@@ -38,7 +38,6 @@ multiple_effects_cards = [
     Card(
         4,
         "Drain Life",
-        "2 (Heal) 2 (Damage)",
         [
             Effect(EffectType.HEAL, 2),
             Effect(EffectType.DAMAGE, 2)
@@ -53,7 +52,6 @@ def cards():
             ret.append(Card(
                 mana_cost,
                 name,
-                f"{value} ({config[1].value.capitalize()})", 
                 [Effect(config[1], value)]
             ))
     return ret 

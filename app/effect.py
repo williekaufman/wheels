@@ -5,27 +5,19 @@ class Effect():
         self.type = type
         self.value = value
        
-    @property
-    def type(self):
-        return self._type
-
-    @type.setter
-    def type(self, value):
-        if isinstance(value, EffectType):
-            self._type = value
-        else:
-            self._type = EffectType(value)
-    
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, value):
-        if isinstance(value, int):
-            self._value = value
-        else:
-            self._value = int(value)
+    def text(self):
+        if self.type == EffectType.HEAL:
+            return f"{self.value} (Heal)"
+        if self.type == EffectType.DAMAGE:
+            return f"{self.value} (Damage)"
+        if self.type == EffectType.BLOCK:
+            return f"{self.value} (Block)"
+        if self.type == EffectType.MANA:
+            return f"{self.value} (Mana)"
+        if self.type == EffectType.SPELL_DAMAGE:
+            return f"{self.value} (Spell Damage)"
+        
+ 
 
     def to_json(self):
         return {
@@ -35,9 +27,10 @@ class Effect():
         
     def of_json(json):
         return Effect(
-            json["type"],
+            EffectType(json["type"]),
             json["value"]
         )
+              
 
     def resolve(self, player, opponent):
         if self.type == EffectType.HEAL:

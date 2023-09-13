@@ -9,49 +9,16 @@ class Element(Enum):
     WATER = "water"
 
 class Card():
-    def __init__(self, mana_cost, name, text, effects):
+    def __init__(self, mana_cost, name, effects):
         self.mana_cost = mana_cost
         self.name = name
-        self.text = text
         self.effects = effects
         
-    @property
-    def mana_cost(self):
-        return self._mana_cost
-   
-    @mana_cost.setter
-    def mana_cost(self, value):
-        self._mana_cost = value
-    
-    @property
-    def name(self):
-        return self._name
-    
-    @name.setter
-    def name(self, value):
-        self._name = value
-    
-    @property
-    def text(self):
-        return self._text
-    
-    @text.setter
-    def text(self, value):
-        self._text = value
-    
-    @property
-    def effects(self):
-        return self._effects
-    
-    @effects.setter
-    def effects(self, value):
-        self._effects = value
-
     def to_json(self):
         return {
             "manaCost": self.mana_cost,
             "name": self.name,
-            "text": self.text,
+            "text": self.text(),
             "effects": [effect.to_json() for effect in self.effects]
         }
    
@@ -59,14 +26,16 @@ class Card():
         return Card(
             json["manaCost"],
             json["name"],
-            json["text"],
             [Effect.of_json(effect) for effect in json["effects"]]
         )
+   
+    def text(self):
+        return ' '.join([effect.text() for effect in self.effects])
     
     def starting_wheel():
-        channel = Card(0, "Channel", "1 (Mana)", [Effect(EffectType.MANA, 1)])
-        fireblast = Card(0, "Fireblast", "1 (Damage)", [Effect(EffectType.DAMAGE, 1)])
-        shield = Card(0, "Shield", "2 (Block)", [Effect(EffectType.BLOCK, 2)])
+        channel = Card(0, "Channel", [Effect(EffectType.MANA, 1)])
+        fireblast = Card(0, "Fireblast", [Effect(EffectType.DAMAGE, 1)])
+        shield = Card(0, "Shield", [Effect(EffectType.BLOCK, 2)])
         return [channel, channel, channel, fireblast, shield, None, None, None, None, None]
     
     def resolve(self, player, opponent):

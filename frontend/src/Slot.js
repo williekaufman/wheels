@@ -49,7 +49,7 @@ function Slot({ card , highlight , lock , basic, onClick }) {
                         return <GreenPlus className="icon" key={index} />;
                     case 'Block':
                         return <Shield className="icon" key={index} />;; 
-                    case 'Spell_damage':
+                    case 'Spell Damage':
                         return <WizardHat className="icon" key={index} />;
                     case 'Mana':
                         return <Mana className="icon" key={index} />;
