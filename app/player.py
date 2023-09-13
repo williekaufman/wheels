@@ -55,7 +55,7 @@ class PlayerNumber(Enum):
         return PlayerNumber(3 - self.value)
 
 class Player():
-    def __init__(self, deck, wheels, username, life=2, mana=0, block=0, spell_damage=0, hand=[], spins=3):
+    def __init__(self, deck, wheels, username, life=20, mana=0, block=0, spell_damage=0, hand=[], spins=3):
         deck = [card for card in deck]
         random.shuffle(deck)
         self.wheels = wheels.copy()
