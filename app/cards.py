@@ -34,10 +34,20 @@ mana_spells = [
     ("Channel III", 6, 10),
 ], EffectType.MANA
 
-cards = []
+multiple_effects_cards = [
+    Card(
+        4,
+        "Drain Life",
+        "2 (Heal) 2 (Damage)",
+        [
+            Effect(EffectType.HEAL, 2),
+            Effect(EffectType.DAMAGE, 2)
+        ]
+    )
+]
 
 def cards():
-    ret = []
+    ret = multiple_effects_cards
     for config in [burn_spells, healing_spells, block_spells, spell_damage_spells, mana_spells]:
         for name, mana_cost, value in config[0]:
             ret.append(Card(

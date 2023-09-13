@@ -83,14 +83,14 @@ function spin(gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlay
         );
 }
 
-function SpinButton({ gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlayerState, submitted }) {
+function SpinButton({ gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlayerState, submitted , result }) {
     function handleClick(e) {
         e.preventDefault();
         spin(gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlayerState);
     }
 
     return (
-        <Button variant="contained" color="primary" disabled={spins <= 0 || submitted} onClick={handleClick}>
+        <Button variant="contained" color="primary" disabled={spins <= 0 || submitted || result} onClick={handleClick}>
             {`Spin (${spins})`}
         </Button>
     )
@@ -130,7 +130,7 @@ function submitTurn(gameId, playerNum, showErrorToast, setLocks, setSubmitted) {
         );
 }
 
-function SubmitButton({ gameId, playerNum, showErrorToast, setLog, setLocks, submitted , setSubmitted }) {
+function SubmitButton({ gameId, playerNum, showErrorToast, setLocks, submitted , setSubmitted , result }) {
     const [open, setOpen] = useState(false);
 
     const handleClickOpen = () => {
@@ -162,7 +162,7 @@ function SubmitButton({ gameId, playerNum, showErrorToast, setLog, setLocks, sub
 
     return (
         <div>
-            <Button variant="contained" color="primary" disabled={submitted} onClick={handleClickOpen} style={{ marginLeft: '10px' }}>
+            <Button variant="contained" color="primary" disabled={submitted || result} onClick={handleClickOpen} style={{ marginLeft: '10px' }}>
                 Submit
             </Button>
             <Dialog open={open} onClose={handleClose}>
@@ -198,7 +198,8 @@ function Wheel({
     setLock,
     activeCardIndex,
     setActiveCardIndex,
-    playerNum
+    playerNum,
+    result
 }) {
     if (!playerState) {
         return (
@@ -207,7 +208,7 @@ function Wheel({
     }
 
     function onClick() {
-        if (activeCardIndex != null) {
+        if (activeCardIndex != null && !result) {
             fetchWrapper(`${URL}/play`, { 'gameId': gameId, 'player': playerNum, 'wheel': element, 'cardIndex': activeCardIndex }, 'POST')
                 .then((res) => res.json())
                 .then((data) => {
@@ -284,7 +285,8 @@ function Wheels({
     setPlayerState,
     activeCardIndex,
     setActiveCardIndex,
-    playerNum
+    playerNum,
+    result
 }) {
     if (!playerState) {
         return null
@@ -305,6 +307,7 @@ function Wheels({
                         activeCardIndex={activeCardIndex}
                         setActiveCardIndex={setActiveCardIndex}
                         playerNum={playerNum}
+                        result={result}
                     />
                 </Grid>
             ))}
@@ -446,6 +449,7 @@ export default function GamePage() {
                         locks={locks}
                         setPlayerState={setPlayerState} 
                         submitted={submitted}
+                        result={result}
                         />
                 </Grid>
                 <Grid item>
@@ -453,13 +457,13 @@ export default function GamePage() {
                         gameId={gameId}
                         playerNum={playerNum}
                         showErrorToast={showErrorToast}
-                        setLog={setLog}
                         setLocks={setLocks}
                         setPlayerState={setPlayerState}
                         setOpponentState={setOpponentState}
                         setSpins={setSpins}
                         submitted={submitted}
                         setSubmitted={setSubmitted}
+                        result={result}
                     />
                 </Grid>
             </Grid >
@@ -476,6 +480,7 @@ export default function GamePage() {
                         activeCardIndex={activeCardIndex}
                         setActiveCardIndex={setActiveCardIndex} 
                         playerNum={playerNum}
+                        result={result}
                         />
                 </Grid>
                 <Grid item style={{ marginBottom: '30px' }}>

@@ -62,14 +62,6 @@ function Slot({ card , highlight , lock , basic, onClick }) {
         });
     };
 
-    const render = (text) => {
-        return (
-            <div>
-                {replaceTextWithImages(text)}
-            </div>
-        )
-    }
-
     if (!card) {
         classNames = classNames + ' empty';
         return (
