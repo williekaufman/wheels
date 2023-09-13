@@ -55,7 +55,7 @@ class PlayerNumber(Enum):
         return PlayerNumber(3 - self.value)
 
 class Player():
-    def __init__(self, deck, wheels, username, life=20, mana=0, block=0, spell_damage=0, hand=[], spins=3):
+    def __init__(self, deck, wheels, username, life=20, mana=0, block=0, damage_reduction=0, spell_damage=0, hand=[], spins=3):
         deck = [card for card in deck]
         random.shuffle(deck)
         self.wheels = wheels.copy()
@@ -63,6 +63,7 @@ class Player():
         self.life = life
         self.mana = mana
         self.block = block
+        self.damage_reduction = damage_reduction
         self.spell_damage = spell_damage
         self.hand = [card for card in hand]
         self.deck = deck
@@ -73,6 +74,7 @@ class Player():
             "life": self.life,
             "mana": self.mana,
             "block": self.block,
+            "damage_reduction": self.damage_reduction,
             "spell_damage": self.spell_damage,
             "hand": [card.to_json() for card in self.hand],
             "deck": [card.to_json() for card in self.deck],
@@ -87,6 +89,7 @@ class Player():
             "life": json["life"],
             "mana": json["mana"],
             "block": json["block"],
+            "damage_reduction": json["damage_reduction"],
             "spell_damage": json["spell_damage"],
             "hand": [Card.of_json(card) for card in json["hand"]],
             "deck": [Card.of_json(card) for card in json["deck"]],
@@ -105,6 +108,7 @@ class Player():
       
     def new_turn(self):
         self.block = 0
+        self.damage_reduction = 0
         self.spell_damage = 0
         for wheel in self.wheels.values():
             wheel.spin()
@@ -123,6 +127,7 @@ class Player():
         self.life += amount
         
     def take_damage(self, amount):
+        amount = max(0, amount - self.damage_reduction)
         if self.block >= amount:
             self.block -= amount
             return amount
@@ -142,6 +147,9 @@ class Player():
         
     def gain_block(self, amount):
         self.block += amount
+        
+    def gain_damage_reduction(self, amount):
+        self.damage_reduction += amount
         
     def gain_spell_damage(self, amount):
         print(f'{self.username} Gained {amount} spell damage')

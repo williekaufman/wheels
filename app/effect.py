@@ -14,6 +14,8 @@ class Effect():
             return f"{synergy_prefix}{self.value} (Damage)"
         if self.type == EffectType.BLOCK:
             return f"{synergy_prefix}{self.value} (Block)"
+        if self.type == EffectType.DAMAGE_REDUCTION:
+            return f"{synergy_prefix}{self.value} (Damage Reduction)"
         if self.type == EffectType.MANA:
             return f"{synergy_prefix}{self.value} (Mana)"
         if self.type == EffectType.SPELL_DAMAGE:
@@ -44,6 +46,9 @@ class Effect():
         elif self.type == EffectType.BLOCK:
             player.gain_block(self.value)
             return f"Blocked for {self.value}"
+        elif self.type == EffectType.DAMAGE_REDUCTION:
+            player.gain_damage_reduction(self.value)
+            return f"Gained {self.value} damage reduction"
         elif self.type == EffectType.MANA:
             player.gain_mana(self.value)
             return f"Gained {self.value} mana"
@@ -55,5 +60,16 @@ class EffectType(Enum):
     HEAL = "heal"
     DAMAGE = "damage"
     BLOCK = "block"
+    DAMAGE_REDUCTION = "damage_reduction"
     MANA = "mana"
     SPELL_DAMAGE = "spell_damage"
+    
+    def priority(self):
+        return {
+            EffectType.SPELL_DAMAGE: 0,
+            EffectType.DAMAGE: 1,
+            EffectType.HEAL: 2,
+            EffectType.DAMAGE_REDUCTION: 3,
+            EffectType.BLOCK: 4,
+            EffectType.MANA: 5
+        }[self]

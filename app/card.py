@@ -7,7 +7,7 @@ class Card():
     def __init__(self, mana_cost, name, effects, elements):
         self.mana_cost = mana_cost
         self.name = name
-        self.effects = effects
+        self.effects = sorted(effects, key=lambda effect: effect.type.priority())
         self.elements = elements
         
     def to_json(self):

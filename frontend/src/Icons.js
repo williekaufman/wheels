@@ -24,6 +24,12 @@ export function Shield() {
     )
 }
 
+export function DamageReduction() {
+    return (
+        <img className="icon" src="/images/damage_resistance.png" alt="Damage Resistance" title="Damage Resistance"/>
+    )
+}
+
 export function Mana() {
     return (
         <img className="icon" src="/images/mana.png" alt="Mana" title="Mana"/>
@@ -50,6 +56,8 @@ export function replaceTextWithImages (text) {
                     return <WizardHat className="icon" key={index} />;
                 case 'Mana':
                     return <Mana className="icon" key={index} />;
+                case 'Damage Reduction':
+                    return <DamageReduction className="icon" key={index} />;
                 default:
                     return part;
             }

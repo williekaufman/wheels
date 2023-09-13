@@ -9,7 +9,7 @@ class Element(Enum):
 
     def description(self):
         return {
-            Element.AIR: "1 (Mana) Discount",
+            Element.AIR: "1 (Mana) discount",
             Element.EARTH: "+1 (Block)",
             Element.FIRE: "+1 (Damage)",
             Element.WATER: "+1 (Heal)"
