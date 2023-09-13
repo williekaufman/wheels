@@ -9,7 +9,8 @@ import traceback
 from functools import wraps
 from engineio.payload import Payload
 from player import Player, PlayerNumber, handle_turn, Result
-from card import starting_wheels, Element
+from element import Element
+from card import starting_wheels
 from cards import cards
 
 Payload.max_decode_packets = 100

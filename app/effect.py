@@ -1,34 +1,36 @@
 from enum import Enum
 
 class Effect():
-    def __init__(self, type, value):
+    def __init__(self, type, value, synergy=False):
         self.type = type
         self.value = value
+        self.synergy = synergy      
        
     def text(self):
+        synergy_prefix = "SYNERGY:" if self.synergy else ""
         if self.type == EffectType.HEAL:
-            return f"{self.value} (Heal)"
+            return f"{synergy_prefix}{self.value} (Heal)"
         if self.type == EffectType.DAMAGE:
-            return f"{self.value} (Damage)"
+            return f"{synergy_prefix}{self.value} (Damage)"
         if self.type == EffectType.BLOCK:
-            return f"{self.value} (Block)"
+            return f"{synergy_prefix}{self.value} (Block)"
         if self.type == EffectType.MANA:
-            return f"{self.value} (Mana)"
+            return f"{synergy_prefix}{self.value} (Mana)"
         if self.type == EffectType.SPELL_DAMAGE:
-            return f"{self.value} (Spell Damage)"
-        
- 
+            return f"{synergy_prefix}{self.value} (Spell Damage)" 
 
     def to_json(self):
         return {
             "type": self.type.value,
-            "value": self.value
+            "value": self.value,
+            "synergy": self.synergy
         }
         
     def of_json(json):
         return Effect(
             EffectType(json["type"]),
-            json["value"]
+            json["value"],
+            json["synergy"]
         )
               
 

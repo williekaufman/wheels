@@ -14,6 +14,7 @@ import { useSocket } from './SocketContext';
 import Toast from './Toast';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import Typography from '@mui/material/Typography';
+import { replaceTextWithImages } from './Icons';
 
 const elements = ['air', 'earth', 'fire', 'water'];
 
@@ -229,9 +230,10 @@ function Wheel({
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Typography variant="h6" style={{ marginBottom: '10px' }}>{replaceTextWithImages(wheel['description'])}</Typography>
             <Button variant={lock ? "contained" : ""} style={{ width: '100%' }} onClick={() => setLock(!lock)}>{lock ? 'unlock' : 'lock'} {element}</Button>
             {wheel['cards'].map((card, index) => (
-                <Slot card={card} key={index} lock={lock} basic={index < 5} highlight={!opponentView && index === wheel['active']} onClick={() => onClick()} />
+                <Slot card={card} key={index} lock={lock} basic={index < 5} elements={[]} highlight={!opponentView && index === wheel['active']} onClick={() => onClick()} />
             ))}
         </div>
     )
@@ -267,6 +269,7 @@ function Hand({ playerState, activeCardIndex, setActiveCardIndex }) {
                         key={index}
                         lock={false}
                         basic={false}
+                        elements={card['elements']}
                         highlight={highlight(index)}
                         onClick={() => onClick(index)}
                     />

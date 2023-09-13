@@ -1,5 +1,7 @@
-from card import Card
+from card import Card, Wheel
 from effect import Effect, EffectType
+from element import Element
+import random
 
 burn_spells = [
     ("Burn", 1, 1),
@@ -41,16 +43,10 @@ multiple_effects_cards = [
         [
             Effect(EffectType.HEAL, 2),
             Effect(EffectType.DAMAGE, 2)
-        ]
+        ],
+        []
     )
 ]
-
-def basic_cards():
-    return {
-        "channel": Card(0, "Channel", [Effect(EffectType.MANA, 1)]),
-        "fireblast": Card(0, "Fireblast", [Effect(EffectType.DAMAGE, 1)]),
-        "shield": Card(0, "Shield", [Effect(EffectType.BLOCK, 2)])
-    }
 
 def cards():
     ret = multiple_effects_cards
@@ -59,6 +55,7 @@ def cards():
             ret.append(Card(
                 mana_cost,
                 name,
-                [Effect(config[1], value)]
+                [Effect(config[1], value)],
+                random.sample([Element.AIR, Element.EARTH, Element.FIRE, Element.WATER], 2)
             ))
     return ret 

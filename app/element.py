@@ -1,0 +1,35 @@
+from enum import Enum
+from effect import Effect, EffectType
+
+class Element(Enum):
+    EARTH = "earth"
+    AIR = "air"
+    WATER = "water"
+    FIRE = "fire"
+
+    def description(self):
+        return {
+            Element.AIR: "1 (Mana) Discount",
+            Element.EARTH: "+1 (Block)",
+            Element.FIRE: "+1 (Damage)",
+            Element.WATER: "+1 (Heal)"
+        }[self]
+    
+    def specialty(self):
+        return {
+            Element.AIR: None,
+            Element.EARTH: EffectType.BLOCK,
+            Element.FIRE: EffectType.DAMAGE,
+            Element.WATER: EffectType.HEAL 
+        }[self]
+        
+    def adjust_effect(self, effect):
+        if effect.type == self.specialty():
+            effect.value += 1
+            effect.synergy = True 
+        
+    def adjust_card(self, card):
+        if self == Element.AIR:
+            card.mana_cost -= 1
+        for effect in card.effects:
+            self.adjust_effect(effect)
