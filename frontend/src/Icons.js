@@ -2,31 +2,31 @@ import React from 'react';
 
 export function Fireball() {
     return (
-        <img className="icon" src="/images/fireball.png" alt="Fireball" />
+        <img className="icon" src="/images/fireball.png" alt="Fireball" title="Damage"/>
     )
 }
 
 export function GreenPlus() {
     return (
-        <img className="icon" src="/images/green_plus.png" alt="Green Plus" />
+        <img className="icon" src="/images/green_plus.png" alt="Green Plus" title="Heal"/>
     )
 }
 
 export function WizardHat() {
     return (
-        <img className="icon" src="/images/mage.svg" alt="Wizard Hat" />
+        <img className="icon" src="/images/mage.svg" alt="Wizard Hat" title="Spell Damage"/>
     )
 }
 
 export function Shield() {
     return (
-        <img className="icon" src="/images/shield.svg" alt="Shield" />
+        <img className="icon" src="/images/shield.svg" alt="Shield" title="Block"/>
     )
 }
 
 export function Mana() {
     return (
-        <img className="icon" src="/images/mana.png" alt="Mana" />
+        <img className="icon" src="/images/mana.png" alt="Mana" title="Mana"/>
     )
 }
 
