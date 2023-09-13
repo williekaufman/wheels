@@ -1,5 +1,5 @@
 .slot {
-  border: 1px solid #ccc;
+  border: 1px solid black;
   box-sizing: border-box;
   border-radius: 5px;
   padding: 10px;
@@ -17,21 +17,12 @@
   background: gray;
 }
 
-.slot.lock {
-  background: red;
-}
-
-.slot.highlight {
-  border: 4px solid blue;
-  background-color: lightgreen;
-}
-
 .slot.air {
-  background: linear-gradient(to right, lightblue 0%, lightblue 100%);
+  background: linear-gradient(to right, powderblue 0%, powderblue 100%);
 }
 
 .slot.earth {
-  background: linear-gradient(to right, green 0%, green 100%);
+  background: linear-gradient(to right, wheat 0%, wheat 100%);
 }
 
 .slot.fire {
@@ -39,67 +30,76 @@
 }
 
 .slot.water {
-  background: linear-gradient(to right, blue 0%, blue 100%);
+  background: linear-gradient(to right, #4c4cff 0%, #4c4cff 100%);
 }
 
 .slot.air.earth {
-  background: linear-gradient(to right, lightblue 50%, green 50%);
+  background: linear-gradient(to right, powderblue 50%, wheat 50%);
 }
 
 .slot.air.fire {
-  background: linear-gradient(to right, lightblue 50%, red 50%);
+  background: linear-gradient(to right, powderblue 50%, red 50%);
 }
 
 .slot.air.water {
-  background: linear-gradient(to right, lightblue 50%, blue 50%);
+  background: linear-gradient(to right, powderblue 50%, #4c4cff 50%);
 }
 
 .slot.earth.fire {
-  background: linear-gradient(to right, green 50%, red 50%);
+  background: linear-gradient(to right, wheat 50%, red 50%);
 }
 
 .slot.earth.water {
-  background: linear-gradient(to right, green 50%, blue 50%);
+  background: linear-gradient(to right, wheat 50%, #4c4cff 50%);
 }
 
 .slot.fire.water {
-  background: linear-gradient(to right, red 50%, blue 50%);
+  background: linear-gradient(to right, red 50%, #4c4cff 50%);
 }
 
 .slot.air.earth.fire {
   background: linear-gradient(to right, 
-              lightblue 0%, lightblue 33.33%, 
-              green 33.33%, green 66.66%, 
+              powderblue 0%, powderblue 33.33%, 
+              wheat 33.33%, wheat 66.66%, 
               red 66.66%, red 100%);
 }
 
 .slot.air.earth.water {
   background: linear-gradient(to right, 
-              lightblue 0%, lightblue 33.33%, 
-              green 33.33%, green 66.66%, 
-              blue 66.66%, blue 100%);
+              powderblue 0%, powderblue 33.33%, 
+              wheat 33.33%, wheat 66.66%, 
+              #4c4cff 66.66%, #4c4cff 100%);
 }
 
 .slot.air.fire.water {
   background: linear-gradient(to right, 
-              lightblue 0%, lightblue 33.33%, 
+              powderblue 0%, powderblue 33.33%, 
               red 33.33%, red 66.66%, 
-              blue 66.66%, blue 100%);
+              #4c4cff 66.66%, #4c4cff 100%);
 }
 
 .slot.earth.fire.water {
   background: linear-gradient(to right, 
-              green 0%, green 33.33%, 
+              wheat 0%, wheat 33.33%, 
               red 33.33%, red 66.66%, 
-              blue 66.66%, blue 100%);
+              #4c4cff 66.66%, #4c4cff 100%);
 }
 
 .slot.air.earth.fire.water {
   background: linear-gradient(to right, 
-              lightblue 0%, lightblue 25%, 
-              green 25%, green 50%, 
+              powderblue 0%, powderblue 25%, 
+              wheat 25%, wheat 50%, 
               red 50%, red 75%, 
-              blue 75%, blue 100%);
+              #4c4cff 75%, #4c4cff 100%);
+}
+
+.slot.lock {
+  background: pink;
+}
+
+.slot.highlight {
+  border: 4px solid black;
+  background: lightgreen;
 }
 
 .card-name {

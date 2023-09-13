@@ -14,3 +14,19 @@
   font-size: 18px; 
   font-weight: bold; 
 }
+
+.air {
+  background: lightblue;
+}
+
+.earth {
+  background: brown;
+}
+
+.fire {
+  background: red;
+}
+
+.water {
+  background: blue;
+}
