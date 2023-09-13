@@ -231,7 +231,7 @@ function Wheel({
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Button variant={lock ? "contained" : ""} style={{ width: '100%' }} onClick={() => setLock(!lock)}>{lock ? 'unlock' : 'lock'} {element}</Button>
             {wheel['cards'].map((card, index) => (
-                <Slot card={card} key={index} lock={lock} basic={index < 5} highlight={index === wheel['active']} onClick={() => onClick()} />
+                <Slot card={card} key={index} lock={lock} basic={index < 5} highlight={!opponentView && index === wheel['active']} onClick={() => onClick()} />
             ))}
         </div>
     )
@@ -393,6 +393,10 @@ function LeftAlignedButtons({
     );
 }
 
+const makeLink = () => {
+    return window.location.href.replace('playerNum=1', 'playerNum=2');
+}
+
 const copyToClipboard = (str) => {
     const el = document.createElement('textarea');
     el.value = str;
@@ -402,14 +406,14 @@ const copyToClipboard = (str) => {
     document.body.removeChild(el);
 };
 
-function RightAlignedButtons({ navigate, showLog, setShowLog, showErrorToast }) {
+function RightAlignedButtons({ navigate, playerNum, showLog, setShowLog }) {
     return (
         <Grid container direction="row" spacing={2} style={{marginRight: '20px' }}>
-            <Grid item>
-                <Button variant="contained" color="primary" onClick={() => showErrorToast('asdf')}>
+            {playerNum === 1 && <Grid item>
+                <Button variant="contained" color="primary" onClick={() => copyToClipboard(makeLink())}>
                     Copy link
                 </Button>
-            </Grid>
+            </Grid>}
             <Grid item>
                 <Button variant={showLog ? "contained" : ""} color={showLog ? "primary" : ""} onClick={() => setShowLog(!showLog)}>
                     {showLog ? 'Hide' : 'Show'} Log
@@ -549,7 +553,7 @@ export default function GamePage() {
                     />
                 </Grid>
                 <Grid item>
-                    <RightAlignedButtons navigate={navigate} showLog={showLog} setShowLog={setShowLog} showErrorToast={showErrorToast}/>
+                    <RightAlignedButtons navigate={navigate} playerNum={playerNum} showLog={showLog} setShowLog={setShowLog} showErrorToast={showErrorToast}/>
                 </Grid>
             </Grid >
             <GameInfo playerState={playerState} opponentState={opponentState} />

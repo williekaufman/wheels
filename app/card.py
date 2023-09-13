@@ -46,7 +46,8 @@ class Card():
         return ret
 
 class Wheel():
-    def __init__(self, cards = None):
+    def __init__(self, element, cards = None):
+        self.element = element
         if cards:
             assert len(cards) == 10
             self.cards = cards
@@ -65,12 +66,14 @@ class Wheel():
         
     def to_json(self):
         return {
+            'element': self.element.value,
             'cards': [card.to_json() if card else None for card in self.cards],
             'active': self.active
         }
         
     def of_json(json):
-        wheel = Wheel([Card.of_json(card) if card else None for card in json['cards']])
+        element = Element(json['element'])
+        wheel = Wheel(element, [Card.of_json(card) if card else None for card in json['cards']])
         wheel.active = json['active']
         return wheel
     
@@ -83,7 +86,8 @@ class Wheel():
         else:
             return 'Empty card'
 
+
 def starting_wheels():
     return {
-        e: Wheel() for e in Element
+        e: Wheel(e) for e in Element
     } 

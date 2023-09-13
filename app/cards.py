@@ -45,6 +45,13 @@ multiple_effects_cards = [
     )
 ]
 
+def basic_cards():
+    return {
+        "channel": Card(0, "Channel", [Effect(EffectType.MANA, 1)]),
+        "fireblast": Card(0, "Fireblast", [Effect(EffectType.DAMAGE, 1)]),
+        "shield": Card(0, "Shield", [Effect(EffectType.BLOCK, 2)])
+    }
+
 def cards():
     ret = multiple_effects_cards
     for config in [burn_spells, healing_spells, block_spells, spell_damage_spells, mana_spells]:

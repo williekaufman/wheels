@@ -7,9 +7,12 @@ from secrets import compare_digest, token_hex
 from redis_utils import rget_json, rset_json, rset, rget
 import traceback
 from functools import wraps
+from engineio.payload import Payload
 from player import Player, PlayerNumber, handle_turn, Result
 from card import starting_wheels, Element
 from cards import cards
+
+Payload.max_decode_packets = 100
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -196,13 +199,11 @@ def submit():
 def on_join(data):
     room = data['room']
     join_room(room)
-    print('joined room')
      
 @socketio.on('leave')
 def on_leave(data):
     room = data['room']
     leave_room(room)
-    print('left room')
     
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=5010, debug=True)
