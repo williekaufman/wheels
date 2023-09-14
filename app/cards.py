@@ -112,7 +112,7 @@ two_color_spells = [
 
 all_elements = [Element.AIR, Element.EARTH, Element.FIRE, Element.WATER]
 
-neutral_spells = [
+mana_spells = [
     Card(
         3,
         "Attune",
@@ -130,7 +130,10 @@ neutral_spells = [
         "Channel",
         [Effect(EffectType.MANA, 8)],
         all_elements
-    ),
+    )
+]
+
+neutral_spells = [
     Card(
         6,
         "Indomitable",
@@ -145,17 +148,17 @@ neutral_spells = [
     ),
     Card(
         6,
-        "One-Two Punch",
+        "1-2 Punch",
         [Effect(EffectType.DAMAGE, 1), Effect(EffectType.DAMAGE, 1)],
         all_elements
     ),
     Card(
-        7,
+        3,
         "Fortress",
-        [Effect(EffectType.BLOCK, 7)],
+        [Effect(EffectType.BLOCK, 6)],
         all_elements
     )
 ]
 
 def cards():
-    return air_spells + earth_spells + fire_spells + water_spells + two_color_spells + neutral_spells
+    return air_spells + earth_spells + fire_spells + water_spells + two_color_spells + neutral_spells + mana_spells * 4

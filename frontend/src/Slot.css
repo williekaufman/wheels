@@ -109,6 +109,9 @@
 .card-name {
   font-size: 1.2rem;
   margin-bottom: 5px;
+  width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .mana-cost {

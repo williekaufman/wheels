@@ -527,6 +527,8 @@ export default function GamePage() {
                     spin(opponentView, gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlayerState);
                 } if (e.key === 'L') {
                     setShowLog(!showLog);
+                } if (e.key === 'N') {
+                    newGame(navigate);
                 }
             }
         }

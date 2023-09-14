@@ -1,6 +1,30 @@
 import React from 'react';
 import './Slot.css';
 import { Mana, replaceTextWithImages } from './Icons';
+import { useEffect, useRef } from 'react';
+
+function ShrinkingTextComponent({ text }) {
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const containerWidth = container.offsetWidth;
+        let fontSize = parseInt(window.getComputedStyle(container).fontSize, 10);
+
+        while (container.scrollWidth > containerWidth && fontSize > 10) {
+            fontSize -= 1;
+            container.style.fontSize = `${fontSize}px`;
+        }
+    }, [text]);
+
+    return (
+        <div ref={containerRef} className="card-name">
+            {text}
+        </div>
+    );
+}
 
 function Slot({ card , highlight , elements, lock , basic, onClick }) {
     let classNames = 'slot';
@@ -28,9 +52,9 @@ function Slot({ card , highlight , elements, lock , basic, onClick }) {
             <div className="mana-cost">{card['mana_cost']}
             <Mana/>
             </div>
-            <div className="card-name">{card['name']}</div>
+            <ShrinkingTextComponent text={card['name']} />
             <div className="card-text">{cardText}</div>
-        </div>
+            </div>
     )
 }
 
