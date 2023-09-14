@@ -114,22 +114,22 @@ def starting_template(config):
 
 configs = {
     Element.AIR: {
-        'channel': 'Channel',
+        'channel': 'Spirit',
         'fireblast': 'Air Blast',
         'shield': 'Wind Wall'
     },
     Element.EARTH: {
-        'channel': 'Channel',
+        'channel': 'Vitalize',
         'fireblast': 'Rock Throw',
         'shield': 'Earth Wall'
     },
     Element.FIRE: {
-        'channel': 'Channel',
+        'channel': 'Inflame',
         'fireblast': 'Singe',
         'shield': 'Fire Wall'
     },
     Element.WATER: {
-        'channel': 'Channel',
+        'channel': 'Reservoir',
         'fireblast': 'Splash',
         'shield': 'Water Wall'
     }

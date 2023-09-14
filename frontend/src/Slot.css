@@ -93,6 +93,10 @@
               #4c4cff 75%, #4c4cff 100%);
 }
 
+.slot.air.earth.fire.water {
+  background: gray;
+}
+
 .slot.lock {
   background: pink;
 }
