@@ -148,7 +148,7 @@ neutral_spells = [
         "One-Two Punch",
         [Effect(EffectType.DAMAGE, 1), Effect(EffectType.DAMAGE, 1)],
         all_elements
-    )
+    ),
     Card(
         7,
         "Fortress",
