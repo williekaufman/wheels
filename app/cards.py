@@ -77,7 +77,7 @@ earth_spells = [
 water_spells = [
     Card(
         2,
-        "Mending Waters",
+        "Mending",
         [Effect(EffectType.HEAL, 2)],
         [Element.WATER]
     ),
