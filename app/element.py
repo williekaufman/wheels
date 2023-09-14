@@ -2,8 +2,8 @@ from enum import Enum
 from effect import Effect, EffectType
 
 class Element(Enum):
-    EARTH = "earth"
     AIR = "air"
+    EARTH = "earth"
     WATER = "water"
     FIRE = "fire"
 
