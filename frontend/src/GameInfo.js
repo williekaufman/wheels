@@ -27,14 +27,17 @@ function GameInfo({ playerState, opponentState }) {
       <Stack direction="row" spacing={2} justifyContent="center">
           <div style={{width: '33%', textAlign: 'center'}}>
             <p style={paragraphStyle}>You</p>
+            <p style={paragraphStyle}>Cards in hand: {playerState['hand'].length}</p>
             <p style={paragraphStyle}>Mana: {playerState['mana']}</p>
             <p style={paragraphStyle}>Health: {playerState['life']}</p>
+            <p style={paragraphStyle}>Experience: {playerState['experience']}</p>
           </div>
           <div style={{width: '33%', textAlign: 'center'}}>
             <p style={paragraphStyle}>Opponent</p>
             <p style={paragraphStyle}>Cards in hand: {opponentState['hand'].length}</p>
             <p style={paragraphStyle}>Mana: {opponentState['mana']}</p>
             <p style={paragraphStyle}>Health: {opponentState['life']}</p>
+            <p style={paragraphStyle}>Experience: {opponentState['experience']}</p>
           </div>
       </Stack>
     </Paper>

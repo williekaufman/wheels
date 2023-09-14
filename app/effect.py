@@ -19,7 +19,11 @@ class Effect():
         if self.type == EffectType.MANA:
             return f"{synergy_prefix}{self.value} (Mana)"
         if self.type == EffectType.SPELL_DAMAGE:
-            return f"{synergy_prefix}{self.value} (Spell Damage)" 
+            return f"{synergy_prefix}{self.value} (Spell Damage)"
+        if self.type == EffectType.EXPERIENCE:
+            return f"{synergy_prefix}{self.value} (Experience)" 
+        if self.type == EffectType.DRAW:
+            return f"{synergy_prefix}{self.value} (Draw)"
 
     def to_json(self):
         return {
@@ -55,6 +59,14 @@ class Effect():
         elif self.type == EffectType.SPELL_DAMAGE:
             player.gain_spell_damage(self.value)
             return f"Gained {self.value} spell damage"
+        elif self.type == EffectType.EXPERIENCE:
+            player.gain_experience(self.value)
+            return f"Gained {self.value} experience"
+        elif self.type == EffectType.DRAW:
+            for i in range(self.value):
+                player.draw()
+            return f"Drew {self.value}{'' if self.value == 1 else 's'} cards"
+            
    
 class EffectType(Enum):
     HEAL = "heal"
@@ -63,6 +75,8 @@ class EffectType(Enum):
     DAMAGE_REDUCTION = "damage_reduction"
     MANA = "mana"
     SPELL_DAMAGE = "spell_damage"
+    EXPERIENCE = "experience"
+    DRAW = "draw"
     
     def priority(self):
         return {
@@ -71,5 +85,7 @@ class EffectType(Enum):
             EffectType.HEAL: 2,
             EffectType.DAMAGE_REDUCTION: 3,
             EffectType.BLOCK: 4,
-            EffectType.MANA: 5
+            EffectType.MANA: 5,
+            EffectType.EXPERIENCE: 6,
+            EffectType.DRAW: 7,
         }[self]

@@ -394,7 +394,7 @@ function LeftAlignedButtons({
             </Grid>
             <Grid item>
                 <Button variant={opponentView ? "contained" : ""} color={opponentView ? "primary" : ""} onClick={() => setOpponentView(!opponentView)} style={{ marginLeft: '10px' }}>
-                    {opponentView ? 'View Your' : 'View Opponent\'s'} Wheels
+                    {opponentView ? 'View Your' : 'View Opponent\'s'} Spellbooks
                 </Button>
             </Grid>
         </Grid>

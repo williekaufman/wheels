@@ -1,6 +1,7 @@
 from card import Card, Wheel
 from effect import Effect, EffectType
 from element import Element
+from local_settings import LOCAL
 import random
 
 air_spells = [
@@ -38,13 +39,13 @@ fire_spells = [
         [Element.FIRE],
     ),
     Card(
-        3,
+        4,
         "Fireblast",
         [Effect(EffectType.DAMAGE, 1), Effect(EffectType.DAMAGE, 1)],
         [Element.FIRE],
     ),
     Card(
-        5,
+        6,
         "Firestorm",
         [Effect(EffectType.DAMAGE, 1), Effect(EffectType.DAMAGE, 1), Effect(EffectType.DAMAGE, 1)],
         [Element.FIRE], 
@@ -133,6 +134,31 @@ mana_spells = [
     )
 ]
 
+exp_spells = [
+    Card(
+        3, 
+        "Training",
+        [Effect(EffectType.EXPERIENCE, 1)],
+        all_elements
+    ),
+    Card(
+        6,
+        "Vigorous Training",
+        [Effect(EffectType.EXPERIENCE, 2)],
+        all_elements
+    ),
+]
+
+draw_spells = [
+    Card(
+        2, 
+        "Research",
+        [Effect(EffectType.DRAW, 1)],
+        all_elements
+    )
+]
+
+
 neutral_spells = [
     Card(
         6,
@@ -160,5 +186,13 @@ neutral_spells = [
     )
 ]
 
+def default_cards():
+    return air_spells + earth_spells + fire_spells + water_spells + two_color_spells + neutral_spells + exp_spells + mana_spells * 4
+
 def cards():
-    return air_spells + earth_spells + fire_spells + water_spells + two_color_spells + neutral_spells + mana_spells * 4
+    if LOCAL:
+        pass
+        # return 3
+    return default_cards()
+
+     
