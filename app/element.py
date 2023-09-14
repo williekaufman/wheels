@@ -4,8 +4,8 @@ from effect import Effect, EffectType
 class Element(Enum):
     AIR = "air"
     EARTH = "earth"
-    WATER = "water"
     FIRE = "fire"
+    WATER = "water"
 
     def description(self):
         return {
