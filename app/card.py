@@ -43,7 +43,7 @@ class Wheel():
         self.element = element
         assert len(cards) == 10
         self.cards = cards
-        if active:
+        if active is not None:
             self.active = active
         else:
             self.spin()
