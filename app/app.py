@@ -139,6 +139,7 @@ def player_two():
     player = Player([Card.of_json(card) for card in deck], starting_wheels(), username)
     player.new_turn()
     set_player(player, PlayerNumber.TWO, game_id)
+    socketio.emit('update', {'gameId': game_id})
     return jsonify({
         "gameId": game_id,
         "player": player.to_json(),

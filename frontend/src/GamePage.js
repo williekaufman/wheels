@@ -582,7 +582,7 @@ export default function GamePage() {
             {showLastTurn && <Grid item>
                 <Turn turn={lastTurn} playerNum={playerNum}/>
             </Grid>}
-            <Grid container direction="column" className="cards-container" spacing={2}>
+            <Grid container direction="column" className="cards-container" spacing={2} style={{marginTop: '10px'}}>
                 <Grid item>
                     <Wheels
                         opponentView={opponentView}

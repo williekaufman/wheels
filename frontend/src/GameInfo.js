@@ -4,7 +4,7 @@ import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 
 function GameInfo({ playerState, opponentState }) {
-    if (!playerState || !opponentState) {
+    if (!playerState) {
         return null;
     }
 
@@ -33,14 +33,14 @@ function GameInfo({ playerState, opponentState }) {
             <p style={paragraphStyle}>Health: {playerState['life']}</p>
             <p style={paragraphStyle}>Experience: {playerState['experience']}</p>
           </div>
-          <div style={{width: '33%', textAlign: 'center'}}>
+          {opponentState ? <div style={{width: '33%', textAlign: 'center'}}>
             <p style={paragraphStyle}>Opponent</p>
             <p style={paragraphStyle}>Cards in hand: {opponentState['hand'].length}</p>
             <p style={paragraphStyle}>Mana: {opponentState['mana']}</p>
             <p style={paragraphStyle}>Focus: {opponentState['focus']}</p>
             <p style={paragraphStyle}>Health: {opponentState['life']}</p>
             <p style={paragraphStyle}>Experience: {opponentState['experience']}</p>
-          </div>
+          </div> : <div> Waiting for opponent... </div>}
       </Stack>
     </Paper>
   );
