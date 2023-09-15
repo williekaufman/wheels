@@ -40,7 +40,7 @@ function GameInfo({ playerState, opponentState }) {
             <p style={paragraphStyle}>Focus: {opponentState['focus']}</p>
             <p style={paragraphStyle}>Health: {opponentState['life']}</p>
             <p style={paragraphStyle}>Experience: {opponentState['experience']}</p>
-          </div> : <div> Waiting for opponent... </div>}
+          </div> : <div style={{width: '33%', textAlign: 'center'}}> Waiting for opponent... </div>}
       </Stack>
     </Paper>
   );
