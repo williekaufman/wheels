@@ -12,7 +12,7 @@ function App() {
         <Route path="/cards" element={<CardsPage />} />
         <Route path="/decks" element={<CardsPage />} />
         <Route path="/game/:game" element={<GamePage />} />
-        <Route path="/" element={<GamePage />} />
+        <Route path="/" element={<CardsPage />} />
       </Routes>
     </Router>
     </SocketProvider>

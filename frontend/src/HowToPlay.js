@@ -36,8 +36,7 @@ const HowToPlay = ({ onClose }) => {
                     <p> To do so, you take two fundamental actions: playing cards from your hand (at the bottom of the screen), and 'spinning', which means rerolling which spell you're casting from your non-locked spellbooks. </p>
                     <p> When you submit your turn, you and your opponents will play all your cards from left to right, and then spin all your spellbooks, do 'once per turn' actions like drawing a card and gaining mana from your focus, and then repeat until someone dies. </p> 
                 <h2> How to Use This Site </h2>
-                    <p> If you navigate to the base URL (ending in :5001), navigate to tinyurl.com/impersonalgoat, or type Shift + N, you'll create a new game, and get redirected to it. You can use the 'Copy Link' button to get a link to share with your opponent. </p>
-                    <p> To see a list of all the cards, you can go to the cards page, located at the base URL slash cards. </p> 
+                    <p> To see a list of all the cards and build a deck, you can go to the decks page, located at the base URL slash decks. </p>
                     <p> To play a card, click on it from your hand, and then the spellbook you want to add it to. Cards in your hand are colored by the spellbooks they can be added to. Cards get a benefit when they are placed in a spellbook based on that spellbook's specialty, which you can see right above their lock button. </p>
                     <p> To (un)lock a spellbook, click the (un)lock button above it. </p>
                     <p> To spin, click the spin button or Shift + S. </p>
