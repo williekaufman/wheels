@@ -40,8 +40,7 @@ class Effect():
             json["value"],
             json["synergy"]
         )
-              
-
+        
     def resolve(self, player, opponent):
         if self.type == EffectType.HEAL:
             player.gain_life(self.value)

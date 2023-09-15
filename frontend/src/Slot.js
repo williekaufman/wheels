@@ -3,7 +3,7 @@ import './Slot.css';
 import { Mana, replaceTextWithImages } from './Icons';
 import { useEffect, useRef } from 'react';
 
-function ShrinkingTextComponent({ text }) {
+function ShrinkingTextComponent({ text , color }) {
     const containerRef = useRef(null);
 
     useEffect(() => {
@@ -20,22 +20,26 @@ function ShrinkingTextComponent({ text }) {
     }, [text]);
 
     return (
-        <div ref={containerRef} className="card-name">
+        <div style={{color: color}} ref={containerRef} className="card-name">
             {text}
         </div>
     );
 }
 
-function Slot({ card , highlight , elements, lock , basic, onClick }) {
+function Slot({ card , highlight , elements, lock , player, failed, basic, onClick , title }) {
     let classNames = 'slot';
     classNames = lock ? classNames + ' lock' : classNames;
     classNames = highlight ? classNames + ' highlight' : classNames;
     classNames = basic ? classNames + ' basic' : classNames; 
-   
+    
+    if (player) {
+        classNames = classNames + ' ' + player;
+    }
+
     if (!card) {
         classNames = classNames + ' empty';
         return (
-            <div className={classNames} onClick={onClick}>
+            <div title={title} className={classNames} onClick={onClick}>
                 Empty
             </div>
         )
@@ -48,11 +52,11 @@ function Slot({ card , highlight , elements, lock , basic, onClick }) {
     });
     
     return (
-        <div className={classNames} onClick={onClick}>
+        <div title={title} className={classNames} onClick={onClick}>
             <div className="mana-cost">{card['mana_cost']}
             <Mana/>
             </div>
-            <ShrinkingTextComponent text={card['name']} />
+            <ShrinkingTextComponent color={failed ? 'red' : 'black'} text={card['name']} />
             <div className="card-text">{cardText}</div>
             </div>
     )

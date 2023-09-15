@@ -14,38 +14,43 @@ class Result(Enum):
             Result.PLAYER_TWO: "Player Two Wins",
             Result.TIE: "Tie"
         }[self]
-        
 
 def resolve_wheel(player, opponent, element):
     wheel = player.wheels[element]
-    log = wheel.resolve(player, opponent)
+    card, log = wheel.resolve(player, opponent)
     time = datetime.datetime.now().strftime("%H:%M:%S")
-    return f'{time}:{player.username}:{element.value}:{log}'
+    return card, f'{time}:{player.username}:{element.value}:{log}'
 
 def check_game_over(player, opponent):
-    if player.life <= 0 and opponent.life <= 0:
-        return Result.TIE
-    elif player.life <= 0:
-        return Result.PLAYER_TWO
-    elif opponent.life <= 0:
-        return Result.PLAYER_ONE
-    else:
-        return None 
+    if player.life <= 0:
+        return Result.TIE if opponent.life <= 0 else Result.PLAYER_TWO
+    return Result.PLAYER_ONE if opponent.life <= 0 else None
 
 def handle_turn(player, opponent):
-    log = []
+    logs = []
+    cards = []
     for element in Element:
-        if (result := check_game_over(player, opponent)):
-            log.append(result.to_description())
-            return result, log
         args = [player, opponent]
+        r = False
         if random.random() > .5:
             args = [opponent, player]
-        log.append(resolve_wheel(*args, element))
-        log.append(resolve_wheel(*reversed(args), element))
+            r = True
+        card, log = resolve_wheel(*args, element)
+        card['player'] = 'playerOne' if r else 'playerTwo'
+        card['log'] = log
+        cards.append(card)
+        logs.append(log)
+        card, log = resolve_wheel(*reversed(args), element)
+        cards.append(card)
+        card['player'] = 'playerTwo' if r else 'playerOne'
+        card['log'] = log
+        logs.append(log)
+        if (result := check_game_over(player, opponent)):
+            logs.append(result.to_description())
+            return result, cards, logs 
     player.new_turn()
     opponent.new_turn()
-    return None, log
+    return None, cards, logs
 
 class PlayerNumber(Enum):
     ONE = 1
@@ -70,6 +75,14 @@ class Player():
         self.hand = [card for card in hand]
         self.deck = deck
         self.spins = spins
+  
+    def diff(self, other):
+        return {
+            'life': self.life - other.life,
+            'mana': self.mana - other.mana,
+            'focus': self.focus - other.focus,
+            'experience': self.experience - other.experience,
+        }
    
     def to_json(self):
         return {

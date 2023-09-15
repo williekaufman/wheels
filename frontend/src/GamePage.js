@@ -15,6 +15,7 @@ import Toast from './Toast';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import Typography from '@mui/material/Typography';
 import { replaceTextWithImages } from './Icons';
+import Turn from './Turn';
 import HowToPlay from './HowToPlay';
 
 const elements = ['air', 'earth', 'fire', 'water'];
@@ -88,7 +89,7 @@ function SpinButton({ opponentView, gameId, playerNum, showErrorToast, spins, se
     )
 }
 
-function updateState(gameId, playerNum, showErrorToast, setResult, setLog, setPlayerState, setOpponentState, setSpins, setSubmitted) {
+function updateState(gameId, playerNum, showErrorToast, setResult, setLog, setLastTurn, setPlayerState, setOpponentState, setSpins, setSubmitted) {
     fetchWrapper(`${URL}/state`, { 'gameId': gameId, 'player': playerNum }, 'GET')
         .then((res) => res.json())
         .then((data) => {
@@ -100,6 +101,7 @@ function updateState(gameId, playerNum, showErrorToast, setResult, setLog, setPl
             setOpponentState(data['opponent']);
             setSpins(data['player']['spins']);
             setSubmitted(data['submitted']);
+            setLastTurn(data['lastTurn']);
             setLog(data['log']);
             data['result'] && setResult(data['result']);
         }
@@ -406,7 +408,7 @@ const copyToClipboard = (str) => {
     document.body.removeChild(el);
 };
 
-function RightAlignedButtons({ navigate, playerNum, showLog, setShowLog , setHowToPlayOpen , gameId }) {
+function RightAlignedButtons({ navigate, playerNum, showLog, setShowLog, showLastTurn, setShowLastTurn, setHowToPlayOpen , gameId }) {
     return (
         <Grid container direction="row" spacing={2} style={{marginRight: '20px' }}>
             <Grid item> <Button variant="contained" onClick={() => setHowToPlayOpen(true)}>Documentation</Button> </Grid>
@@ -420,6 +422,12 @@ function RightAlignedButtons({ navigate, playerNum, showLog, setShowLog , setHow
                     {showLog ? 'Hide' : 'Show'} Log
                 </Button>
             </Grid>
+            <Grid item>
+                <Button variant="contained" onClick={() => setShowLastTurn(!showLastTurn)}>
+                    {showLastTurn ? 'Hide' : 'Show'} Last Turn
+                </Button>
+            </Grid>
+ 
             <Grid item>
             </Grid>
         </Grid>
@@ -446,6 +454,9 @@ export default function GamePage() {
     const [playerState, setPlayerState] = useState();
     const [opponentState, setOpponentState] = useState();
     const [result, setResult] = useState();
+    
+    const [lastTurn, setLastTurn] = useState();
+    const [currentAnimation, setCurrentAnimation] = useState();
 
     const [gameId, setGameId] = useState(game);
     const [activeCardIndex, setActiveCardIndex] = useState();
@@ -454,6 +465,7 @@ export default function GamePage() {
 
     const [log, setLog] = useState([]);
     const [showLog, setShowLog] = useState(false);
+    const [showLastTurn, setShowLastTurn] = useState(false);
     const [error, setError] = useState(null);
 
     const [howToPlayOpen, setHowToPlayOpen] = useState(false);
@@ -494,14 +506,14 @@ export default function GamePage() {
         });
 
         socket.on('update', () => {
-            updateState(gameId, playerNum, showErrorToast, setResult, setLog, setPlayerState, setOpponentState, setSpins, setSubmitted);
+            updateState(gameId, playerNum, showErrorToast, setResult, setLog, setLastTurn, setPlayerState, setOpponentState, setSpins, setSubmitted);
         })
 
         return onClose
     }, [socket]);
 
     useEffect(() => {
-        updateState(gameId, playerNum, showErrorToast, setResult, setLog, setPlayerState, setOpponentState, setSpins, setSubmitted);
+        updateState(gameId, playerNum, showErrorToast, setResult, setLog, setLastTurn, setPlayerState, setOpponentState, setSpins, setSubmitted);
     }, [gameId]);
 
     useEffect(() => {
@@ -532,7 +544,7 @@ export default function GamePage() {
     return (
         <div>
             <ResultBanner result={result} playerNum={playerNum} />
-            {howToPlayOpen && <HowToPlay onClose={() => setHowToPlayOpen(false)}/>}
+            {howToPlayOpen && <HowToPlay onClose={() => setHowToPlayOpen(false)} />}
             <Grid container direction="row" style={{ marginTop: '10px', marginLeft: '10px', justifyContent: 'space-between' }}>
                 <Grid item>
                     <LeftAlignedButtons
@@ -554,17 +566,22 @@ export default function GamePage() {
                     />
                 </Grid>
                 <Grid item>
-                    <RightAlignedButtons 
+                    <RightAlignedButtons
                         navigate={navigate}
                         playerNum={playerNum}
                         showLog={showLog}
                         setShowLog={setShowLog}
+                        showLastTurn={showLastTurn}
+                        setShowLastTurn={setShowLastTurn}
                         showErrorToast={showErrorToast}
                         setHowToPlayOpen={setHowToPlayOpen}
                         gameId={gameId} />
                 </Grid>
             </Grid >
             <GameInfo playerState={playerState} opponentState={opponentState} />
+            {showLastTurn && <Grid item>
+                <Turn turn={lastTurn} playerNum={playerNum}/>
+            </Grid>}
             <Grid container direction="column" className="cards-container" spacing={2}>
                 <Grid item>
                     <Wheels

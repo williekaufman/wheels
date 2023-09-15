@@ -75,6 +75,12 @@ def get_log(game_id):
 def set_log(log, game_id):
     rset_json('log', log, game_id=game_id)
 
+def get_last_turn(game_id):
+    return rget_json('last_turn', game_id=game_id)
+
+def set_last_turn(cards, game_id):
+    rset_json('last_turn', cards, game_id=game_id)
+
 def add_deck(username, deckname):
     current_decks = rget_json(f"decks:{username}") or []
     if deckname not in current_decks:
@@ -151,11 +157,13 @@ def state():
     if player is None:
         return make_response(jsonify({"error": "Invalid player"}), 400)
     result = get_result(game_id)
+    last_turn = get_last_turn(game_id)
     ret = {
         "player": player.to_json(),
         "opponent": opponent and opponent.to_json(),
         "submitted": get_submitted(playerNum, game_id),
-        "log": get_log(game_id)
+        "log": get_log(game_id),
+        "lastTurn": last_turn, 
     }
     if result is not None:
         ret["result"] = result.to_description()
@@ -222,9 +230,20 @@ def submit():
         return make_response(jsonify({"error": "Invalid player"}), 400)
     if get_submitted(playerNum.other(), game_id):
         log = get_log(game_id)
-        result, new_logs = handle_turn(player, opponent)
+        player_one_copy = get_player(PlayerNumber.ONE, game_id)
+        player_two_copy = get_player(PlayerNumber.TWO, game_id)
+        result, cards, new_logs = handle_turn(player, opponent)
         log.extend(new_logs)
         set_log(log, game_id)
+        for card in cards:
+            if (card['card'] is not None):
+                card['card'] = card['card'].to_json()
+        last_turn = {
+            'cards': cards,
+            'player1Diff': (player if playerNum == PlayerNumber.ONE else opponent).diff(player_one_copy),
+            'player2Diff': (player if playerNum == PlayerNumber.TWO else opponent).diff(player_two_copy),
+        }
+        set_last_turn(last_turn, game_id)
         clear_submitted(playerNum.other(), game_id)
         result and set_result(result, game_id)
         socketio.emit('update', {'gameId': game_id})

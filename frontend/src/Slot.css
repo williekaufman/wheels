@@ -97,6 +97,14 @@
       hsl(300, 100%, 75%))
 }
 
+.slot.playerOne {
+  background: lightgreen
+}
+
+.slot.playerTwo {
+  background: cyan;
+}
+
 .slot.lock {
   background: pink;
 }

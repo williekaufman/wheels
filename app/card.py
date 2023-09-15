@@ -30,13 +30,21 @@ class Card():
    
     def text(self):
         return ' '.join([effect.text() for effect in self.effects])
-    
+   
     def resolve(self, player, opponent):
-        ret = []
+        logs = []
         if player.pay_mana(self.mana_cost):
             for effect in self.effects:
-                ret.append(effect.resolve(player, opponent))
-        return ret
+                logs.append(effect.resolve(player, opponent))
+            return {
+                "card": self,
+                "animate": True,
+                }, logs
+        return {
+            "card": self, 
+            "animate": False, 
+            "reason": "Not enough mana"
+            }, ['Not enough mana']
 
 class Wheel():
     def __init__(self, element, cards, active=None):
@@ -77,9 +85,13 @@ class Wheel():
 
     def resolve(self, player, opponent):
         if self.active_card():
-            return ','.join(self.active_card().resolve(player, opponent))
+            return self.active_card().resolve(player, opponent)
         else:
-            return 'Empty card'
+            return {
+                "card": None,
+                "animate": False,
+                "reason": "No card"
+            }, 'Empty card'
         
 def channel(name="Channel"):
     return Card(0, name, [Effect(EffectType.MANA, 1)], [])
