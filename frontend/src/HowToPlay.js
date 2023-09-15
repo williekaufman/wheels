@@ -42,7 +42,7 @@ const HowToPlay = ({ onClose }) => {
                     <p> To (un)lock a spellbook, click the (un)lock button above it. </p>
                     <p> To spin, click the spin button or Shift + S. </p>
                     <p> To submit, click the submit button or Shift + Enter. </p>
-                    <p> If you're running a server locally or you run localStorage.setItem('wheels-admin', true) in a console, you can submit for your opponent with Ctrl + Shift + Enter (even if you don't actually have an opponent) to make testing stuff easier. </p>
+                    <p> If you're running a server locally or you run localStorage.setItem('spellbooks-admin', true) in a console, you can submit for your opponent with Ctrl + Shift + Enter (even if you don't actually have an opponent) to make testing stuff easier. </p>
                     <p> You can look at a debug log produced by the server by clicking show log. The top row is the most recent event. </p>
                 <h2> Stats and Icons </h2>
                 <p>

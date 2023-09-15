@@ -509,7 +509,6 @@ export default function GamePage() {
         });
 
         socket.on('update', () => {
-            console.log(gameId, 'updating');
             updateState(gameId, playerNum, showErrorToast, setResult, setLog, setPlayerState, setOpponentState, setSpins, setSubmitted);
         })
 
