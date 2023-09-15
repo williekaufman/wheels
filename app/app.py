@@ -74,6 +74,23 @@ def get_log(game_id):
 def set_log(log, game_id):
     rset_json('log', log, game_id=game_id)
 
+def add_deck(username, deckname):
+    current_decks = rget_json(f"decks:{username}") or []
+    if deckname not in current_decks:
+        current_decks.append(deckname)
+    rset_json(f"decks:{username}", current_decks)
+
+def remove_deck(username, deckname):
+    current_decks = rget_json(f"decks:{username}") or []
+    current_decks.remove(deckname)
+    rset_json(f"decks:{username}", current_decks)
+    
+def get_deck(username, deckname):
+    return rget_json(f"decks:{username}:{deckname}")
+
+def get_all_decks(username):
+    return rget_json(f"decks:{username}") or []
+
 @app.route("/cards", methods=["GET"])
 @api_endpoint
 def get_cards():
@@ -204,6 +221,52 @@ def submit():
         "player": player.to_json(),
         "opponent": opponent.to_json(),
     })
+    
+@app.route('/decks', methods=['POST'])
+@api_endpoint
+def push_deck():
+    username = request.json.get('username')
+    deckname = request.json.get('deckname')
+    deck = request.json.get('deck')
+    if username is None:
+        return { "error": "No username" }
+    if deckname is None:
+        return { "error": "No deckname" } 
+    if deck is None:
+        return { "error": "No deck" }
+    rset_json(f"decks:{username}:{deckname}", deck)
+    add_deck(username, deckname)
+    return jsonify({"success": True})
+
+@app.route('/decks/<deckname>', methods=['GET'])
+@api_endpoint
+def see_deck(deckname):
+    username = request.args.get('username')
+    if username is None:
+        return { "error": "No username" }
+    return jsonify({
+        "deck": get_deck(username, deckname)
+    })
+
+@app.route('/decks/delete/<deckname>', methods=['POST'])
+@api_endpoint
+def delete_deck(deckname):
+    username = request.json.get('username')
+    if username is None:
+        return { "error": "No username" }
+    remove_deck(username, deckname)
+    return jsonify({"success": True})
+
+@app.route('/decks', methods=['GET'])
+@api_endpoint
+def get_decknames():
+    username = request.args.get('username')
+    if username is None:
+        return { "error": "No username" }
+    return jsonify({
+        "decks": get_all_decks(username)
+    })
+    
 
 @socketio.on('join')
 def on_join(data):

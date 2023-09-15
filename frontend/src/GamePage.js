@@ -20,7 +20,7 @@ import HowToPlay from './HowToPlay';
 const elements = ['air', 'earth', 'fire', 'water'];
 
 function admin() {
-    return window.location.href.includes('localhost') || localStorage.getItem('wheels-admin');
+    return window.location.href.includes('localhost') || localStorage.getItem('spellbooks-admin');
 }
 
 function makeRequestOptions(body, method = 'POST') {
@@ -396,7 +396,7 @@ function LeftAlignedButtons({
                 />
             </Grid>
             <Grid item>
-                <Button variant="contained" onClick={() => setOpponentView(!opponentView)} style={{ marginLeft: '10px' }}>
+                <Button variant="contained" onClick={() => setOpponentView(!opponentView)} >
                     {opponentView ? 'View Your' : 'View Opponent\'s'} Spellbooks
                 </Button>
             </Grid>
@@ -469,7 +469,6 @@ export default function GamePage() {
     const [log, setLog] = useState([]);
     const [showLog, setShowLog] = useState(false);
     const [error, setError] = useState(null);
-
 
     const [howToPlayOpen, setHowToPlayOpen] = useState(false);
     const [submitted, setSubmitted] = useState(false);
