@@ -75,6 +75,9 @@ function newGame(navigate, username, deckname) {
 }
 
 function joinGame(navigate, gameId, username, deckname) {
+    if (!gameId) {
+        return;
+    }
     return fetchWrapper(`${URL}/join_game`, { 'username': username, 'deckname': deckname, 'gameId': gameId }, 'POST')
         .then((res) => res.json())
         .then((data) => {
