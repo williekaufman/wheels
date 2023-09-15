@@ -55,7 +55,7 @@ class PlayerNumber(Enum):
         return PlayerNumber(3 - self.value)
 
 class Player():
-    def __init__(self, deck, wheels, username, life=20, mana=0, block=0, damage_reduction=0, experience=0, spell_damage=0, hand=[], spins=3):
+    def __init__(self, deck, wheels, username, life=20, mana=0, block=0, damage_reduction=0, experience=0, focus=0, spell_damage=0, hand=[], spins=3):
         deck = [card for card in deck]
         random.shuffle(deck)
         self.wheels = wheels.copy()
@@ -65,6 +65,7 @@ class Player():
         self.block = block
         self.damage_reduction = damage_reduction
         self.experience = experience
+        self.focus = focus
         self.spell_damage = spell_damage
         self.hand = [card for card in hand]
         self.deck = deck
@@ -77,6 +78,7 @@ class Player():
             "block": self.block,
             "damage_reduction": self.damage_reduction,
             "experience": self.experience,
+            "focus": self.focus,
             "spell_damage": self.spell_damage,
             "hand": [card.to_json() for card in self.hand],
             "deck": [card.to_json() for card in self.deck],
@@ -93,6 +95,7 @@ class Player():
             "block": json["block"],
             "damage_reduction": json["damage_reduction"],
             "experience": json["experience"],
+            "focus": json["focus"],
             "spell_damage": json["spell_damage"],
             "hand": [Card.of_json(card) for card in json["hand"]],
             "deck": [Card.of_json(card) for card in json["deck"]],
@@ -115,6 +118,7 @@ class Player():
         for wheel in self.wheels.values():
             wheel.spin()
         self.spins = 3 + self.experience
+        self.mana += self.focus
         self.draw()
    
     def finish_turn(self, opponent):
@@ -157,6 +161,9 @@ class Player():
        
     def gain_experience(self, amount):
         self.experience += amount
+        
+    def gain_focus(self, amount):
+        self.focus += amount
          
     def gain_spell_damage(self, amount):
         self.spell_damage += amount

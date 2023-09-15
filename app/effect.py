@@ -21,7 +21,9 @@ class Effect():
         if self.type == EffectType.SPELL_DAMAGE:
             return f"{synergy_prefix}{self.value} (Spell Damage)"
         if self.type == EffectType.EXPERIENCE:
-            return f"{synergy_prefix}{self.value} (Experience)" 
+            return f"{synergy_prefix}{self.value} (Experience)"
+        if self.type == EffectType.FOCUS:
+            return f"{synergy_prefix}{self.value} (Focus)"
         if self.type == EffectType.DRAW:
             return f"{synergy_prefix}{self.value} (Draw)"
 
@@ -62,6 +64,9 @@ class Effect():
         elif self.type == EffectType.EXPERIENCE:
             player.gain_experience(self.value)
             return f"Gained {self.value} experience"
+        elif self.type == EffectType.FOCUS:
+            player.gain_focus(self.value)
+            return f"Gained {self.value} focus"
         elif self.type == EffectType.DRAW:
             for i in range(self.value):
                 player.draw()
@@ -77,6 +82,7 @@ class EffectType(Enum):
     SPELL_DAMAGE = "spell_damage"
     EXPERIENCE = "experience"
     DRAW = "draw"
+    FOCUS = "focus"
     
     def priority(self):
         return {
@@ -88,4 +94,5 @@ class EffectType(Enum):
             EffectType.MANA: 5,
             EffectType.EXPERIENCE: 6,
             EffectType.DRAW: 7,
+            EffectType.FOCUS: 8,
         }[self]

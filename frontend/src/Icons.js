@@ -48,6 +48,11 @@ export function Mana() {
     )
 }
 
+export function Focus() {
+    return (
+        <img className="icon" src="/images/brain.png" alt="Focus" title="Focus"/>
+    )
+}
 
 function formatSynergyNumber(number) {
     return <span style={{ color: 'green' }}>{number}</span>;
@@ -69,6 +74,8 @@ export function replaceTextWithImages (text) {
                     return <WizardHat className="icon" key={index} />;
                 case 'Mana':
                     return <Mana className="icon" key={index} />;
+                case 'Focus':
+                    return <Focus className="icon" key={index} />;
                 case 'Damage Reduction':
                     return <DamageReduction className="icon" key={index} />;
                 case 'Experience':

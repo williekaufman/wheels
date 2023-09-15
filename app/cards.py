@@ -2,8 +2,6 @@ from card import Card, Wheel
 from effect import Effect, EffectType
 from element import Element
 from local_settings import LOCAL
-import random
-from enum import Enum
 
 air_spells = [
     Card(
@@ -27,7 +25,7 @@ air_spells = [
     Card(
         6,
         "Inner Peace",
-        [Effect(EffectType.MANA, 3), Effect(EffectType.SPELL_DAMAGE, 2)],
+        [Effect(EffectType.MANA, 4), Effect(EffectType.FOCUS, 1), Effect(EffectType.SPELL_DAMAGE, 2)],
         [Element.AIR]
     )
 ]
@@ -52,9 +50,27 @@ fire_spells = [
         [Element.FIRE], 
     ),
     Card(
+        10,
+        "Conflagration",
+        [Effect(EffectType.DAMAGE, 2), Effect(EffectType.DAMAGE, 2), Effect(EffectType.DAMAGE, 2)],
+        [Element.FIRE],
+    ),
+    Card(
         5,
         "Inner Fire",
         [Effect(EffectType.SPELL_DAMAGE, 6)],
+        [Element.FIRE],
+    ),
+    Card(
+        2,
+        "All Out Attack",
+        [Effect(EffectType.DAMAGE, 3), Effect(EffectType.DAMAGE_REDUCTION, -2)],
+        [Element.FIRE]
+    ),
+    Card(
+        2,
+        "Fiery Passion",
+        [Effect(EffectType.HEAL, -3), Effect(EffectType.MANA, 10)],
         [Element.FIRE],
     )
 ]
@@ -94,6 +110,12 @@ water_spells = [
         "Tsunami",
         [Effect(EffectType.DAMAGE, 4)],
         [Element.WATER]
+    ),
+    Card(
+        3,
+        "Scrying",
+        [Effect(EffectType.DRAW, 1), Effect(EffectType.EXPERIENCE, 1)],
+        [Element.WATER] 
     )
 ]
 
@@ -116,24 +138,41 @@ all_elements = [Element.AIR, Element.EARTH, Element.FIRE, Element.WATER]
 
 mana_spells = [
     Card(
-        2,
+        3,
         "Attune",
+        [Effect(EffectType.FOCUS, 1)],
+        all_elements
+    ),
+    Card(
+        6,
+        "Channel",
+        [Effect(EffectType.FOCUS, 2)],
+        all_elements
+    ),
+    Card(
+        8,
+        "One With Nature",
+        [Effect(EffectType.FOCUS, 3)],
+        all_elements
+    ),
+    Card(
+        2,
+        "Infuse",
         [Effect(EffectType.MANA, 4)],
         all_elements
     ),
    Card(
         4,
-        "Channel",
+        "Gather Energy",
         [Effect(EffectType.MANA, 8)],
         all_elements
     ),
        Card(
         6,
-        "One With Nature",
+        "Burst With Power",
         [Effect(EffectType.MANA, 12)],
         all_elements
     ),
- 
 ]
 
 exp_spells = [
@@ -201,11 +240,11 @@ neutral_spells = [
 ]
 
 def default_cards():
-    return air_spells + earth_spells + fire_spells + water_spells + two_color_spells + neutral_spells + exp_spells + mana_spells * 4 + draw_spells * 4
+    return air_spells + earth_spells + fire_spells + water_spells + two_color_spells + neutral_spells + exp_spells + mana_spells * 2 + draw_spells * 4
 
 def cards():
     if LOCAL:
-        # return draw_spells
+        return mana_spells
         pass
     return default_cards()
 
