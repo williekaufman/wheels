@@ -4,6 +4,7 @@ import Slot from './Slot.js';
 import { URL } from './settings';
 import Button from '@mui/material/Button';
 import Toast from './Toast.js';
+import { useNavigate } from 'react-router-dom';
 
 import { fetchWrapper } from './GamePage.js';
 
@@ -38,6 +39,34 @@ function deleteDeck(deckname, username, showErrorToast) {
         )
 }
 
+function newGame(navigate, username, deckname) {
+    return fetchWrapper(`${URL}/new_game`, { 'username': username, 'deckname': deckname }, 'POST')
+        .then((res) => res.json())
+        .then((data) => {
+            if (data['error']) {
+                console.log(data['error']);
+                return;
+            }
+            navigate(`/game/${data['gameId']}?playerNum=1`);
+            window.location.reload();
+        }
+        );
+}
+
+function joinGame(navigate, gameId, username, deckname) {
+    return fetchWrapper(`${URL}/join_game`, { 'username': username, 'deckname': deckname, 'gameId': gameId }, 'POST')
+        .then((res) => res.json())
+        .then((data) => {
+            if (data['error']) {
+                console.log(data['error']);
+                return;
+            }
+            navigate(`/game/${data['gameId']}?playerNum=2`);
+            window.location.reload();
+        }
+        );
+}
+
 export default function CardsPage() {
     const [cards, setCards] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -46,6 +75,7 @@ export default function CardsPage() {
     const [decks, setDecks] = useState([]);
     const [username, setUsername] = useState(localStorage.getItem('spellbooks-username') || '');
     const [deckname, setDeckname] = useState('');
+    const navigate = useNavigate();
 
     const setDeckFromName = (deckname) => {
         fetchWrapper(`${URL}/decks/${deckname}`, { 'username': username }, 'GET')
@@ -138,8 +168,20 @@ export default function CardsPage() {
                         value={deckname}
                         onChange={(e) => setDeckname(e.target.value)}
                     />
-                    <Button variant="contained" style={{ marginLeft: '20px' }} onClick={() => submit(deck, username, deckname, showErrorToast)}>Submit</Button>
-                    <Button variant="contained" style={{ marginLeft: '20px' }} onClick={() => deleteDeck(deckname, username, showErrorToast)}>Delete</Button>
+                    <Grid container direction="row" spacing={2} style={{ marginTop: '0px' }}>
+                        <Grid item>
+                            <Button variant="contained" onClick={() => setDeck([])}>Clear Deck</Button>
+                        </Grid> 
+                        <Grid item>
+                            <Button disabled={!deckname} variant="contained" onClick={() => submit(deck, username, deckname, showErrorToast)}>Submit</Button>
+                        </Grid> <Grid item>
+                            <Button disabled={!deckname} variant="contained" onClick={() => deleteDeck(deckname, username, showErrorToast)}>Delete</Button>
+                        </Grid> <Grid item>
+                            <Button disabled={!deckname} variant="contained" onClick={() => { submit(deck, username, deckname, showErrorToast) ; newGame(navigate, username, deckname)}}>{deckname ? 'New Game With Deck' : 'Name deck to use'}</Button>
+                        </Grid> <Grid item>
+                            <Button disabled={!deckname} variant="contained" onClick={() => { submit(deck, username, deckname, showErrorToast) ; joinGame(navigate, prompt('Enter game ID'), username, deckname)}}>{deckname ? 'Join Game With Deck' : 'Name deck to use'}</Button>
+                        </Grid>
+                    </Grid>
                 </Grid>
                 {decks && <Grid item>
                     <Grid container spacing={2}>

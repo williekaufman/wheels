@@ -10,6 +10,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/cards" element={<CardsPage />} />
+        <Route path="/decks" element={<CardsPage />} />
         <Route path="/game/:game" element={<GamePage />} />
         <Route path="/" element={<GamePage />} />
       </Routes>

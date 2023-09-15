@@ -53,20 +53,6 @@ export function fetchWrapper(url, body, method = 'POST') {
     });
 }
 
-function newGame(navigate) {
-    return fetchWrapper(`${URL}/new_game`, {}, 'POST')
-        .then((res) => res.json())
-        .then((data) => {
-            if (data['error']) {
-                console.log(data['error']);
-                return;
-            }
-            navigate(`/game/${data['gameId']}?playerNum=1`);
-            window.location.reload();
-        }
-        );
-}
-
 function spin(opponentView, gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlayerState) {
     if (spins < 1 || opponentView) {
         return;
@@ -236,6 +222,12 @@ function Wheel({
         }
     }
 
+    if (opponentView && !opponentState) {
+        return (
+            <div> </div>
+        )
+    }
+
     const wheel = (opponentView ? opponentState : playerState)['wheels'][element];
 
     return (
@@ -359,6 +351,7 @@ function LeftAlignedButtons({
     locks,
     setLocks,
     setPlayerState,
+    opponentState,
     setOpponentState,
     submitted,
     result,
@@ -396,16 +389,12 @@ function LeftAlignedButtons({
                 />
             </Grid>
             <Grid item>
-                <Button variant="contained" onClick={() => setOpponentView(!opponentView)} >
+                <Button disabled={!opponentState} variant="contained" onClick={() => setOpponentView(!opponentView)} >
                     {opponentView ? 'View Your' : 'View Opponent\'s'} Spellbooks
                 </Button>
             </Grid>
         </Grid>
     );
-}
-
-const makeLink = () => {
-    return window.location.href.replace('playerNum=1', 'playerNum=2');
 }
 
 const copyToClipboard = (str) => {
@@ -417,13 +406,13 @@ const copyToClipboard = (str) => {
     document.body.removeChild(el);
 };
 
-function RightAlignedButtons({ navigate, playerNum, showLog, setShowLog , setHowToPlayOpen }) {
+function RightAlignedButtons({ navigate, playerNum, showLog, setShowLog , setHowToPlayOpen , gameId }) {
     return (
         <Grid container direction="row" spacing={2} style={{marginRight: '20px' }}>
             <Grid item> <Button variant="contained" onClick={() => setHowToPlayOpen(true)}>Documentation</Button> </Grid>
             {playerNum === 1 && <Grid item>
-                <Button variant="contained" color="primary" onClick={() => copyToClipboard(makeLink())}>
-                    Copy link
+                <Button variant="contained" color="primary" onClick={() => copyToClipboard(gameId)}>
+                    Copy GameId
                 </Button>
             </Grid>}
             <Grid item>
@@ -432,9 +421,6 @@ function RightAlignedButtons({ navigate, playerNum, showLog, setShowLog , setHow
                 </Button>
             </Grid>
             <Grid item>
-                <Button variant="contained" color="primary" onClick={() => newGame(navigate)} >
-                    New Game
-                </Button>
             </Grid>
         </Grid>
     );
@@ -515,11 +501,7 @@ export default function GamePage() {
     }, [socket]);
 
     useEffect(() => {
-        if (gameId) {
-            updateState(gameId, playerNum, showErrorToast, setResult, setLog, setPlayerState, setOpponentState, setSpins, setSubmitted);
-        } else {
-            newGame(navigate)
-        }
+        updateState(gameId, playerNum, showErrorToast, setResult, setLog, setPlayerState, setOpponentState, setSpins, setSubmitted);
     }, [gameId]);
 
     useEffect(() => {
@@ -536,8 +518,6 @@ export default function GamePage() {
                     spin(opponentView, gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlayerState);
                 } if (e.key === 'L') {
                     setShowLog(!showLog);
-                } if (e.key === 'N') {
-                    newGame(navigate);
                 }
             }
         }
@@ -564,6 +544,7 @@ export default function GamePage() {
                         locks={locks}
                         setLocks={setLocks}
                         setPlayerState={setPlayerState}
+                        opponentState={opponentState}
                         setOpponentState={setOpponentState}
                         submitted={submitted}
                         result={result}
@@ -579,7 +560,8 @@ export default function GamePage() {
                         showLog={showLog}
                         setShowLog={setShowLog}
                         showErrorToast={showErrorToast}
-                        setHowToPlayOpen={setHowToPlayOpen} />
+                        setHowToPlayOpen={setHowToPlayOpen}
+                        gameId={gameId} />
                 </Grid>
             </Grid >
             <GameInfo playerState={playerState} opponentState={opponentState} />
