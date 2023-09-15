@@ -15,14 +15,12 @@ import Toast from './Toast';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import Typography from '@mui/material/Typography';
 import { replaceTextWithImages } from './Icons';
+import HowToPlay from './HowToPlay';
 
 const elements = ['air', 'earth', 'fire', 'water'];
 
-const colors = {
-    'air': 'powderblue',
-    'earth': 'wheat',
-    'fire': 'red',
-    'water': '#4c4cff',
+function admin() {
+    return window.location.href.includes('localhost') || localStorage.getItem('wheels-admin');
 }
 
 function makeRequestOptions(body, method = 'POST') {
@@ -41,7 +39,7 @@ function makeRequestOptions(body, method = 'POST') {
     };
 }
 
-function fetchWrapper(url, body, method = 'POST') {
+export function fetchWrapper(url, body, method = 'POST') {
     if (method === 'GET') {
         if (body) {
             url = `${url}?`;
@@ -121,6 +119,11 @@ function updateState(gameId, playerNum, showErrorToast, setResult, setLog, setPl
         }
         );
 }
+
+function submitTurnForOpponent(gameId, playerNum) {
+    fetchWrapper(`${URL}/submit`, { 'gameId': gameId, 'player': (3 - playerNum) }, 'POST')
+}
+
 
 function submitTurn(gameId, playerNum, showErrorToast, setLocks, setSubmitted) {
     fetchWrapper(`${URL}/submit`, { 'gameId': gameId, 'player': playerNum }, 'POST')
@@ -237,7 +240,7 @@ function Wheel({
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Typography variant="h6" style={{ marginBottom: '10px' }}>{replaceTextWithImages(wheel['description'])}</Typography>
+            <Typography variant="h6">{replaceTextWithImages(wheel['description'])}</Typography>
             <Button style={{ width: '100%' }} onClick={() => setLock(!lock)}>{lock ? 'unlock' : 'lock'} {element}</Button>
             {wheel['cards'].map((card, index) => (
                 <Slot card={card} key={index} lock={lock} basic={index < 5} elements={[element]} highlight={!opponentView && index === wheel['active']} onClick={() => onClick()} />
@@ -393,7 +396,7 @@ function LeftAlignedButtons({
                 />
             </Grid>
             <Grid item>
-                <Button variant={opponentView ? "contained" : ""} color={opponentView ? "primary" : ""} onClick={() => setOpponentView(!opponentView)} style={{ marginLeft: '10px' }}>
+                <Button variant="contained" onClick={() => setOpponentView(!opponentView)} style={{ marginLeft: '10px' }}>
                     {opponentView ? 'View Your' : 'View Opponent\'s'} Spellbooks
                 </Button>
             </Grid>
@@ -414,16 +417,17 @@ const copyToClipboard = (str) => {
     document.body.removeChild(el);
 };
 
-function RightAlignedButtons({ navigate, playerNum, showLog, setShowLog }) {
+function RightAlignedButtons({ navigate, playerNum, showLog, setShowLog , setHowToPlayOpen }) {
     return (
         <Grid container direction="row" spacing={2} style={{marginRight: '20px' }}>
+            <Grid item> <Button variant="contained" onClick={() => setHowToPlayOpen(true)}>Documentation</Button> </Grid>
             {playerNum === 1 && <Grid item>
                 <Button variant="contained" color="primary" onClick={() => copyToClipboard(makeLink())}>
                     Copy link
                 </Button>
             </Grid>}
             <Grid item>
-                <Button variant={showLog ? "contained" : ""} color={showLog ? "primary" : ""} onClick={() => setShowLog(!showLog)}>
+                <Button variant="contained" onClick={() => setShowLog(!showLog)}>
                     {showLog ? 'Hide' : 'Show'} Log
                 </Button>
             </Grid>
@@ -466,6 +470,8 @@ export default function GamePage() {
     const [showLog, setShowLog] = useState(false);
     const [error, setError] = useState(null);
 
+
+    const [howToPlayOpen, setHowToPlayOpen] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [opponentView, setOpponentView] = useState(false);
 
@@ -520,9 +526,14 @@ export default function GamePage() {
 
     useEffect(() => {
         const f = (e) => {
-            if (e.ctrlKey && e.key === 'Enter') {
-                submitTurn(gameId, playerNum, showErrorToast, setLocks, setSubmitted);
-            } if (e.shiftKey) {
+            if (e.shiftKey) {
+                if (e.key === 'Enter') {
+                    if (admin() && e.ctrlKey) {
+                        submitTurnForOpponent(gameId, playerNum);
+                    } else {
+                        submitTurn(gameId, playerNum, showErrorToast, setLocks, setSubmitted);
+                    }
+                }
                 if (e.key === 'S') {
                     spin(opponentView, gameId, playerNum, showErrorToast, spins, setSpins, locks, setPlayerState);
                 } if (e.key === 'L') {
@@ -543,6 +554,7 @@ export default function GamePage() {
     return (
         <div>
             <ResultBanner result={result} playerNum={playerNum} />
+            {howToPlayOpen && <HowToPlay onClose={() => setHowToPlayOpen(false)}/>}
             <Grid container direction="row" style={{ marginTop: '10px', marginLeft: '10px', justifyContent: 'space-between' }}>
                 <Grid item>
                     <LeftAlignedButtons
@@ -563,7 +575,13 @@ export default function GamePage() {
                     />
                 </Grid>
                 <Grid item>
-                    <RightAlignedButtons navigate={navigate} playerNum={playerNum} showLog={showLog} setShowLog={setShowLog} showErrorToast={showErrorToast}/>
+                    <RightAlignedButtons 
+                        navigate={navigate}
+                        playerNum={playerNum}
+                        showLog={showLog}
+                        setShowLog={setShowLog}
+                        showErrorToast={showErrorToast}
+                        setHowToPlayOpen={setHowToPlayOpen} />
                 </Grid>
             </Grid >
             <GameInfo playerState={playerState} opponentState={opponentState} />

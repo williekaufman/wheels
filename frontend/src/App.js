@@ -1,6 +1,7 @@
 import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import GamePage from './GamePage';
+import CardsPage from './CardsPage';
 import { SocketProvider } from './SocketContext';
 
 function App() {
@@ -8,6 +9,7 @@ function App() {
     <SocketProvider>
     <Router>
       <Routes>
+        <Route path="/cards" element={<CardsPage />} />
         <Route path="/game/:game" element={<GamePage />} />
         <Route path="/" element={<GamePage />} />
       </Routes>

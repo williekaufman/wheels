@@ -23,7 +23,7 @@ air_spells = [
         [Element.AIR]
     ),
     Card(
-        6,
+        7,
         "Inner Peace",
         [Effect(EffectType.MANA, 4), Effect(EffectType.FOCUS, 1), Effect(EffectType.SPELL_DAMAGE, 2)],
         [Element.AIR]
@@ -87,9 +87,20 @@ earth_spells = [
         "Rockslide",
         [Effect(EffectType.DAMAGE, 3)],
         [Element.EARTH]
+    ),
+    Card(
+        4,
+        "Sanctuary",
+        [Effect(EffectType.BLOCK, 4), Effect(EffectType.FOCUS, 1)],
+        [Element.EARTH]
+    ),
+    Card(
+        2,
+        "Trip",
+        [Effect(EffectType.SPELL_DAMAGE, 2)],
+        [Element.EARTH]
     )
 ]
-
 
 
 water_spells = [
@@ -116,22 +127,52 @@ water_spells = [
         "Scrying",
         [Effect(EffectType.DRAW, 1), Effect(EffectType.EXPERIENCE, 1)],
         [Element.WATER] 
+    ),
+    Card(
+        0,
+        "Splash",
+        [Effect(EffectType.DAMAGE, 0)],
+        [Element.WATER]
     )
 ]
 
 two_color_spells = [
     Card(
         6,
-        "Tornado",
+        "Ferrous Wheel",
         [Effect(EffectType.DAMAGE, 2), Effect(EffectType.DAMAGE, 2)],
         [Element.AIR, Element.EARTH]
     ),
     Card(
         8,
         "Eruption",
-        [Effect(EffectType.DAMAGE, 3), Effect(EffectType.DAMAGE, 3)],
+        [Effect(EffectType.DAMAGE, 4), Effect(EffectType.EXPERIENCE, 1)],
         [Element.FIRE, Element.EARTH]
     ),
+    Card(
+        3,
+        "Mud Bath",
+        [Effect(EffectType.HEAL, 2), Effect(EffectType.BLOCK, 3)],
+        [Element.EARTH, Element.WATER]
+    ),
+    Card(
+        4,
+        "Fan the Flames",
+        [Effect(EffectType.DAMAGE, 0), Effect(EffectType.SPELL_DAMAGE, 2)],
+        [Element.FIRE, Element.AIR]
+    ),
+    Card(
+        4,
+        "Geyser",
+        [Effect(EffectType.DAMAGE, 2), Effect(EffectType.HEAL, 2)],
+        [Element.FIRE, Element.WATER] 
+    ),
+    Card(
+        5,
+        "Like Water",
+        [Effect(EffectType.DAMAGE_REDUCTION, 1), Effect(EffectType.HEAL, 1), Effect(EffectType.FOCUS, 1)],
+        [Element.WATER, Element.AIR]
+    ) 
 ]
 
 all_elements = [Element.AIR, Element.EARTH, Element.FIRE, Element.WATER]
@@ -184,7 +225,7 @@ exp_spells = [
     ),
     Card(
         6,
-        "Diligence",
+        "Perfect",
         [Effect(EffectType.EXPERIENCE, 2)],
         all_elements
     ),
@@ -199,7 +240,7 @@ draw_spells = [
     ),
     Card(
         4,
-        "Meditation",
+        "Meditate",
         [Effect(EffectType.DRAW, 2)],
         all_elements
     ),
@@ -214,7 +255,7 @@ draw_spells = [
 
 neutral_spells = [
     Card(
-        6,
+        4,
         "Indomitable",
         [Effect(EffectType.DAMAGE_REDUCTION, 3)],
         all_elements
@@ -244,7 +285,7 @@ def default_cards():
 
 def cards():
     if LOCAL:
-        return mana_spells
+        # return mana_spells
         pass
     return default_cards()
 

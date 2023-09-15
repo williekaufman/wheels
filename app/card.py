@@ -130,7 +130,7 @@ configs = {
     },
     Element.WATER: {
         'channel': 'Reservoir',
-        'fireblast': 'Splash',
+        'fireblast': 'Water Jet',
         'shield': 'Water Wall'
     }
 }

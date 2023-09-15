@@ -20,7 +20,7 @@ export function WizardHat() {
 
 export function Shield() {
     return (
-        <img className="icon" src="/images/shield.svg" alt="Shield" title="Block"/>
+        <img className="icon" src="/images/shield.png" alt="Shield" title="Block"/>
     )
 }
 

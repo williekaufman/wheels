@@ -74,6 +74,13 @@ def get_log(game_id):
 def set_log(log, game_id):
     rset_json('log', log, game_id=game_id)
 
+@app.route("/cards", methods=["GET"])
+@api_endpoint
+def get_cards():
+    return jsonify({
+        "cards": [card.to_json() for card in cards()]
+    })
+
 @app.route("/new_game", methods=["POST"])
 @api_endpoint
 def new_game():
@@ -138,6 +145,8 @@ def spin():
         return make_response(jsonify({"error": "No locks"}), 400)
     if player.spins <= 0:
         return make_response(jsonify({"error": "No spins left"}), 400)
+    if get_submitted(playerNum, game_id):
+        return make_response(jsonify({"error": "Already submitted"}), 400) 
     player.spins -= 1
     for element, wheel in player.wheels.items():
         if element.value not in locks:
