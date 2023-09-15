@@ -190,9 +190,9 @@ export default function CardsPage() {
                         </Grid> <Grid item>
                             <Button disabled={!deckname} variant="contained" onClick={() => deleteDeck(deckname, setDeckname, username, setDeck, setDecks, showErrorToast)}>Delete</Button>
                         </Grid> <Grid item>
-                            <Button disabled={!deckname} variant="contained" onClick={() => { submit(deck, username, deckname, showErrorToast); newGame(navigate, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
+                            <Button disabled={!deckname || !deck.length} variant="contained" onClick={() => { submit(deck, username, deckname, showErrorToast); newGame(navigate, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
                         </Grid> <Grid item>
-                            <Button disabled={!deckname} variant="contained" onClick={() => { submit(deck, username, deckname, showErrorToast); joinGame(navigate, prompt('Enter game ID'), username, deckname) }}>{deckname ? `Join Game With ${deckname}` : 'Name deck to use'}</Button>
+                            <Button disabled={!deckname || !deck.length} variant="contained" onClick={() => { submit(deck, username, deckname, showErrorToast); joinGame(navigate, prompt('Enter game ID'), username, deckname) }}>{deckname ? `Join Game With ${deckname}` : 'Name deck to use'}</Button>
                         </Grid>
                     </Grid>
                 </Grid>
