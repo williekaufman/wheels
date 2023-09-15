@@ -16,28 +16,49 @@ function removeFromDeck(index, deck, setDeck) {
     setDeck(deck.filter((card, i) => i !== index));
 }
 
-function submit(deck, username, deckname, showErrorToast) {
+function submit(deck, username, deckname, setDecks, showErrorToast) {
     fetchWrapper(`${URL}/decks`, { 'deck': deck, 'username': username, 'deckname': deckname }, 'POST')
         .then((response) => {
             if (response['error']) {
                 console.log(response['error']);
                 showErrorToast(response['error']);
             }
+            getDecks(username, setDecks);
             return response.json();
         }
         )
 }
 
-function deleteDeck(deckname, username, showErrorToast) {
+function deleteDeck(deckname, setDeckname, username, setDeck, setDecks, showErrorToast) {
     fetchWrapper(`${URL}/decks/delete/${deckname}`, { 'username': username }, 'POST')
         .then((response) => {
             if (response['error']) {
                 showErrorToast(response['error']);
             }
+            getDecks(username, setDecks);
+            setDeck([]);
+            setDeckname('');
             return response.json();
         }
         )
 }
+
+function getDecks(username, setDecks) {
+    fetchWrapper(`${URL}/decks`, { 'username': username }, 'GET')
+        .then((response) => {
+            if (response['error']) {
+                console.log(response['error']);
+                return;
+            }
+            return response.json();
+        }
+        )
+        .then((data) => {
+            setDecks(data['decks']);
+        }
+    );
+}
+
 
 function newGame(navigate, username, deckname) {
     return fetchWrapper(`${URL}/new_game`, { 'username': username, 'deckname': deckname }, 'POST')
@@ -103,23 +124,15 @@ export default function CardsPage() {
     };
 
     useEffect(() => {
-        const f = async () => {
-            const response = await fetchWrapper(`${URL}/decks`, { 'username': username }, 'GET');
-            if (response['error']) {
-                showErrorToast(response['error']);
-            }
-            const data = await response.json();
-            setDecks(data['decks']);
-        }
-
-        f();
+        getDecks(username, setDecks);
 
         const interval = setInterval(() => {
-            f();
+            getDecks(username, setDecks);
         }
-            , 5000);
+        , 5000);
 
-    }, []);
+        return () => clearInterval(interval);
+    }, [username]);
 
 
     useEffect(() => {
@@ -171,15 +184,15 @@ export default function CardsPage() {
                     <Grid container direction="row" spacing={2} style={{ marginTop: '0px' }}>
                         <Grid item>
                             <Button variant="contained" onClick={() => setDeck([])}>Clear Deck</Button>
-                        </Grid> 
+                        </Grid>
                         <Grid item>
-                            <Button disabled={!deckname} variant="contained" onClick={() => submit(deck, username, deckname, showErrorToast)}>Submit</Button>
+                            <Button disabled={!deckname} variant="contained" onClick={() => submit(deck, username, deckname, setDecks, showErrorToast)}>Submit</Button>
                         </Grid> <Grid item>
-                            <Button disabled={!deckname} variant="contained" onClick={() => deleteDeck(deckname, username, showErrorToast)}>Delete</Button>
+                            <Button disabled={!deckname} variant="contained" onClick={() => deleteDeck(deckname, setDeckname, username, setDeck, setDecks, showErrorToast)}>Delete</Button>
                         </Grid> <Grid item>
-                            <Button disabled={!deckname} variant="contained" onClick={() => { submit(deck, username, deckname, showErrorToast) ; newGame(navigate, username, deckname)}}>{deckname ? 'New Game With Deck' : 'Name deck to use'}</Button>
+                            <Button disabled={!deckname} variant="contained" onClick={() => { submit(deck, username, deckname, showErrorToast); newGame(navigate, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
                         </Grid> <Grid item>
-                            <Button disabled={!deckname} variant="contained" onClick={() => { submit(deck, username, deckname, showErrorToast) ; joinGame(navigate, prompt('Enter game ID'), username, deckname)}}>{deckname ? 'Join Game With Deck' : 'Name deck to use'}</Button>
+                            <Button disabled={!deckname} variant="contained" onClick={() => { submit(deck, username, deckname, showErrorToast); joinGame(navigate, prompt('Enter game ID'), username, deckname) }}>{deckname ? `Join Game With ${deckname}` : 'Name deck to use'}</Button>
                         </Grid>
                     </Grid>
                 </Grid>
