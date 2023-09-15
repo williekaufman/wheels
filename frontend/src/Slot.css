@@ -15,6 +15,7 @@
 
 .slot.empty {
   background: gray;
+  height: initial;
 }
 
 .slot.air {
@@ -86,14 +87,6 @@
 }
 
 .slot.air.earth.fire.water {
-  background: linear-gradient(to right, 
-              powderblue 0%, powderblue 25%, 
-              wheat 25%, wheat 50%, 
-              red 50%, red 75%, 
-              #4c4cff 75%, #4c4cff 100%);
-}
-
-.slot.air.earth.fire.water {
   background: gray;
 }
 
@@ -103,12 +96,14 @@
 
 .slot.highlight {
   border: 4px solid black;
-  background: yellow;
+  background: yellow !important;
+  padding: 7px;
 }
 
 .card-name {
   font-size: 1.2rem;
   margin-bottom: 5px;
+  height: 30px;
   width: 120px;
   white-space: nowrap;
   overflow: hidden;

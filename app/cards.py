@@ -3,6 +3,7 @@ from effect import Effect, EffectType
 from element import Element
 from local_settings import LOCAL
 import random
+from enum import Enum
 
 air_spells = [
     Card(
@@ -115,35 +116,36 @@ all_elements = [Element.AIR, Element.EARTH, Element.FIRE, Element.WATER]
 
 mana_spells = [
     Card(
-        3,
+        2,
         "Attune",
-        [Effect(EffectType.MANA, 5)],
+        [Effect(EffectType.MANA, 4)],
         all_elements
     ),
-    Card(
-        8,
+   Card(
+        4,
+        "Channel",
+        [Effect(EffectType.MANA, 8)],
+        all_elements
+    ),
+       Card(
+        6,
         "One With Nature",
         [Effect(EffectType.MANA, 12)],
         all_elements
     ),
-    Card(
-        5,
-        "Channel",
-        [Effect(EffectType.MANA, 8)],
-        all_elements
-    )
+ 
 ]
 
 exp_spells = [
     Card(
         3, 
-        "Training",
+        "Practice",
         [Effect(EffectType.EXPERIENCE, 1)],
         all_elements
     ),
     Card(
         6,
-        "Vigorous Training",
+        "Diligence",
         [Effect(EffectType.EXPERIENCE, 2)],
         all_elements
     ),
@@ -154,6 +156,18 @@ draw_spells = [
         2, 
         "Research",
         [Effect(EffectType.DRAW, 1)],
+        all_elements
+    ),
+    Card(
+        4,
+        "Meditation",
+        [Effect(EffectType.DRAW, 2)],
+        all_elements
+    ),
+        Card(
+        6,
+        "Concentrate",
+        [Effect(EffectType.DRAW, 3)],
         all_elements
     )
 ]
@@ -174,7 +188,7 @@ neutral_spells = [
     ),
     Card(
         6,
-        "1-2 Punch",
+        "One-Two Punch",
         [Effect(EffectType.DAMAGE, 1), Effect(EffectType.DAMAGE, 1)],
         all_elements
     ),
@@ -187,12 +201,12 @@ neutral_spells = [
 ]
 
 def default_cards():
-    return air_spells + earth_spells + fire_spells + water_spells + two_color_spells + neutral_spells + exp_spells + mana_spells * 4
+    return air_spells + earth_spells + fire_spells + water_spells + two_color_spells + neutral_spells + exp_spells + mana_spells * 4 + draw_spells * 4
 
 def cards():
     if LOCAL:
+        # return draw_spells
         pass
-        # return 3
     return default_cards()
 
      

@@ -30,11 +30,24 @@ export function DamageReduction() {
     )
 }
 
+export function Experience() {
+    return (
+        <img className="icon" src="/images/experience.png" alt="Experience" title="Experience"/>
+    )
+}
+
+export function Draw() {
+    return (
+        <img className="icon" src="/images/draw.svg" alt="Draw" title="Draw"/>
+    )
+}
+
 export function Mana() {
     return (
         <img className="icon" src="/images/mana.png" alt="Mana" title="Mana"/>
     )
 }
+
 
 function formatSynergyNumber(number) {
     return <span style={{ color: 'green' }}>{number}</span>;
@@ -58,6 +71,10 @@ export function replaceTextWithImages (text) {
                     return <Mana className="icon" key={index} />;
                 case 'Damage Reduction':
                     return <DamageReduction className="icon" key={index} />;
+                case 'Experience':
+                    return <Experience className="icon" key={index} />;
+                case 'Draw':
+                    return <Draw className="icon" key={index} />;
                 default:
                     return part;
             }
