@@ -281,7 +281,7 @@ neutral_spells = [
 ]
 
 def default_cards():
-    return air_spells + earth_spells + fire_spells + water_spells + two_color_spells + neutral_spells + exp_spells + mana_spells * 2 + draw_spells * 4
+    return air_spells + earth_spells + fire_spells + water_spells + two_color_spells + neutral_spells + exp_spells + mana_spells + draw_spells
 
 def cards():
     if LOCAL:
