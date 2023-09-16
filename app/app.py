@@ -247,11 +247,11 @@ def submit():
         set_last_turn(last_turn, game_id)
         clear_submitted(playerNum.other(), game_id)
         result and set_result(result, game_id)
+        set_player(player, playerNum, game_id)
+        set_player(opponent, opponentNum, game_id)
         socketio.emit('update', {'gameId': game_id})
     else:
         set_submitted(playerNum, game_id)
-    set_player(player, playerNum, game_id)
-    set_player(opponent, opponentNum, game_id)
     return jsonify({
         "player": player.to_json(),
         "opponent": opponent and opponent.to_json(),

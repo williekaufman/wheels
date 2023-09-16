@@ -5,6 +5,7 @@ import { URL } from './settings';
 import Button from '@mui/material/Button';
 import Toast from './Toast.js';
 import { useNavigate } from 'react-router-dom';
+import Paper from '@mui/material/Paper';
 
 import { fetchWrapper } from './GamePage.js';
 
@@ -55,7 +56,7 @@ function getDecks(username, setDecks, showErrorToast) {
         .then((data) => {
             setDecks(data['decks']);
         }
-    );
+        );
 }
 
 
@@ -131,7 +132,7 @@ export default function CardsPage() {
         const interval = setInterval(() => {
             getDecks(username, setDecks, showErrorToast);
         }
-        , 5000);
+            , 5000);
 
         return () => clearInterval(interval);
     }, [username]);
@@ -190,18 +191,20 @@ export default function CardsPage() {
                         </Grid> <Grid item>
                             <Button disabled={!deckname || !deck.length} variant="contained" onClick={() => { submit(deck, username, deckname, setDecks, showErrorToast); newGame(navigate, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
                         </Grid> <Grid item>
-                            <Button disabled={!deckname || !deck.length} variant="contained" onClick={() => { submit(deck, username, deckname, setDecks, showErrorToast); joinGame(navigate, prompt('Enter Game Id'), username, deckname, showErrorToast ) }}>{deckname ? `Join Game With ${deckname}` : 'Name deck to use'}</Button>
+                            <Button disabled={!deckname || !deck.length} variant="contained" onClick={() => { submit(deck, username, deckname, setDecks, showErrorToast); joinGame(navigate, prompt('Enter Game Id'), username, deckname, showErrorToast) }}>{deckname ? `Join Game With ${deckname}` : 'Name deck to use'}</Button>
                         </Grid>
                     </Grid>
                 </Grid>
                 {decks && <Grid item>
-                    <Grid container spacing={2}>
-                        {decks.map((deck, i) => (
-                            <Grid item key={i}>
-                                <Button variant="contained" onClick={() => setDeckFromName(deck)}>{deck}</Button>
-                            </Grid>
-                        ))}
-                    </Grid>
+                    <Paper style={{ padding: '10px', backgroundColor: 'lightblue' }}>
+                        <Grid container spacing={2}>
+                            {decks.map((deck, i) => (
+                                <Grid item key={i}>
+                                    <Button variant="contained" style={{ backgroundColor: deck === deckname ? 'red' : 'blue' }} onClick={() => setDeckFromName(deck)}>{deck}</Button>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Paper>
                 </Grid>}
                 <Grid item>
                     <Grid container direction="row" spacing={2}>
