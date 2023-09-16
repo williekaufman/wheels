@@ -20,10 +20,9 @@ function submit(deck, username, deckname, setDecks, showErrorToast) {
     fetchWrapper(`${URL}/decks`, { 'deck': deck, 'username': username, 'deckname': deckname }, 'POST')
         .then((response) => {
             if (response['error']) {
-                console.log(response['error']);
                 showErrorToast(response['error']);
             }
-            getDecks(username, setDecks);
+            getDecks(username, setDecks, showErrorToast);
             return response.json();
         }
         )
@@ -35,7 +34,7 @@ function deleteDeck(deckname, setDeckname, username, setDeck, setDecks, showErro
             if (response['error']) {
                 showErrorToast(response['error']);
             }
-            getDecks(username, setDecks);
+            getDecks(username, setDecks, showErrorToast);
             setDeck([]);
             setDeckname('');
             return response.json();
@@ -43,11 +42,11 @@ function deleteDeck(deckname, setDeckname, username, setDeck, setDecks, showErro
         )
 }
 
-function getDecks(username, setDecks) {
+function getDecks(username, setDecks, showErrorToast) {
     fetchWrapper(`${URL}/decks`, { 'username': username }, 'GET')
         .then((response) => {
             if (response['error']) {
-                console.log(response['error']);
+                showErrorToast(response['error']);
                 return;
             }
             return response.json();
@@ -74,7 +73,7 @@ function newGame(navigate, username, deckname) {
         );
 }
 
-function joinGame(navigate, gameId, username, deckname) {
+function joinGame(navigate, gameId, username, deckname, showErrorToast) {
     if (!gameId) {
         return;
     }
@@ -82,7 +81,7 @@ function joinGame(navigate, gameId, username, deckname) {
         .then((res) => res.json())
         .then((data) => {
             if (data['error']) {
-                console.log(data['error']);
+                showErrorToast(data['error']);
                 return;
             }
             navigate(`/game/${data['gameId']}?playerNum=2`);
@@ -113,8 +112,8 @@ export default function CardsPage() {
                 setDeck(data['deck']);
                 setDeckname(deckname);
             })
-            .catch((error) => {
-                setError(error);
+            .catch((e) => {
+                setError(e);
             });
     }
 
@@ -130,7 +129,7 @@ export default function CardsPage() {
         getDecks(username, setDecks);
 
         const interval = setInterval(() => {
-            getDecks(username, setDecks);
+            getDecks(username, setDecks, showErrorToast);
         }
         , 5000);
 
@@ -158,10 +157,6 @@ export default function CardsPage() {
 
     if (loading) {
         return null
-    }
-
-    if (error) {
-        return <p>{error}</p>;
     }
 
     return (
@@ -193,9 +188,9 @@ export default function CardsPage() {
                         </Grid> <Grid item>
                             <Button disabled={!deckname} variant="contained" onClick={() => deleteDeck(deckname, setDeckname, username, setDeck, setDecks, showErrorToast)}>Delete</Button>
                         </Grid> <Grid item>
-                            <Button disabled={!deckname || !deck.length} variant="contained" onClick={() => { submit(deck, username, deckname, showErrorToast); newGame(navigate, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
+                            <Button disabled={!deckname || !deck.length} variant="contained" onClick={() => { submit(deck, username, deckname, setDecks, showErrorToast); newGame(navigate, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
                         </Grid> <Grid item>
-                            <Button disabled={!deckname || !deck.length} variant="contained" onClick={() => { submit(deck, username, deckname, showErrorToast); joinGame(navigate, prompt('Enter game ID'), username, deckname) }}>{deckname ? `Join Game With ${deckname}` : 'Name deck to use'}</Button>
+                            <Button disabled={!deckname || !deck.length} variant="contained" onClick={() => { submit(deck, username, deckname, setDecks, showErrorToast); joinGame(navigate, prompt('Enter Game Id'), username, deckname, showErrorToast ) }}>{deckname ? `Join Game With ${deckname}` : 'Name deck to use'}</Button>
                         </Grid>
                     </Grid>
                 </Grid>
