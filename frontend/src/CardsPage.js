@@ -6,7 +6,6 @@ import Button from '@mui/material/Button';
 import Toast from './Toast.js';
 import { useNavigate } from 'react-router-dom';
 import Paper from '@mui/material/Paper';
-
 import { fetchWrapper } from './GamePage.js';
 
 function addToDeck(card, deck, setDeck) {
@@ -99,6 +98,8 @@ export default function CardsPage() {
     const [decks, setDecks] = useState([]);
     const [username, setUsername] = useState(localStorage.getItem('spellbooks-username') || '');
     const [deckname, setDeckname] = useState('');
+    const [cardnameFilter, setCardnameFilter] = useState('');
+    const [elementFilter, setElementFilter] = useState();
     const navigate = useNavigate();
 
     const setDeckFromName = (deckname) => {
@@ -159,6 +160,33 @@ export default function CardsPage() {
     if (loading) {
         return null
     }
+    
+    const elements = ['fire', 'water', 'earth', 'air'];
+
+    function filterByNames(card) {
+        if (cardnameFilter) {
+            let regex;
+            try {
+                regex = new RegExp(cardnameFilter.toLowerCase());
+            } catch (e) {
+                return false;
+            }
+            return regex.test(card.name.toLowerCase());
+        } else {
+            return true;
+        }
+    }
+
+    function filterByElements(card) {
+        if (elementFilter) {
+            let neutral = elements.every((element) => card.elements.includes(element));
+            if (elementFilter === 'neutral') {
+                return neutral
+            }
+            return card.elements.includes(elementFilter) && !neutral;
+        }
+        return true;
+    }
 
     return (
         <div>
@@ -180,9 +208,27 @@ export default function CardsPage() {
                         value={deckname}
                         onChange={(e) => setDeckname(e.target.value)}
                     />
+                    <label style={{ marginLeft: '10px' }}> Card name filter: </label>
+                    <input
+                        type="text"
+                        value={cardnameFilter}
+                        onChange={(e) => setCardnameFilter(e.target.value)}
+                    />
+                    <label style={{ marginLeft: '10px' }}> Element filter: </label>
+                    <select
+                        value={elementFilter}
+                        onChange={(e) => setElementFilter(e.target.value)}
+                    >
+                        <option value="">Any</option>
+                        <option value="fire">Fire</option>
+                        <option value="water">Water</option>
+                        <option value="earth">Earth</option>
+                        <option value="air">Air</option>
+                        <option value="neutral">Neutral</option>
+                    </select>
                     <Grid container direction="row" spacing={2} style={{ marginTop: '0px' }}>
                         <Grid item>
-                            <Button variant="contained" onClick={() => setDeck([])}>Clear Deck</Button>
+                            <Button disabled={!deck.length} variant="contained" onClick={() => setDeck([])}>Clear Deck</Button>
                         </Grid>
                         <Grid item>
                             <Button disabled={!deckname} variant="contained" onClick={() => submit(deck, username, deckname, setDecks, showErrorToast)}>Submit</Button>
@@ -209,6 +255,7 @@ export default function CardsPage() {
                 <Grid item>
                     <Grid container direction="row" spacing={2}>
                         {cards.map((card, i) => (
+                            filterByNames(card) && filterByElements(card) &&
                             <Grid item key={i}>
                                 <Slot
                                     card={card}
