@@ -156,11 +156,7 @@ export default function CardsPage() {
                 setLoading(false);
             });
     }, []);
-
-    if (loading) {
-        return null
-    }
-    
+   
     const elements = ['fire', 'water', 'earth', 'air'];
 
     function filterByNames(card) {
@@ -186,6 +182,10 @@ export default function CardsPage() {
             return card.elements.includes(elementFilter) && !neutral;
         }
         return true;
+    }
+
+    if (loading) {
+        return null
     }
 
     return (
