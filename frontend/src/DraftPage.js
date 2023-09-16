@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 import Toast from './Toast.js';
 import { fetchWrapper } from './GamePage.js';
 import Box from '@mui/material/Box';
-import { useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 function submit(deck, username, deckname, showErrorToast) {
     fetchWrapper(`${URL}/decks`, { 'deck': deck, 'username': username, 'deckname': deckname }, 'POST')
@@ -15,7 +15,6 @@ function submit(deck, username, deckname, showErrorToast) {
             if (response['error']) {
                 showErrorToast(response['error']);
             }
-            showErrorToast('Deck saved');
             return response.json();
         }
         )
@@ -54,6 +53,8 @@ function Histogram({ data, initial }) {
 
     let height_per = Math.min(100 / max);
 
+
+    
     return (
         <Box display="flex" alignItems="flex-end" height={height_per * max + 30}>
             {Object.entries(histogram).map(([number, frequency]) => (
@@ -81,7 +82,7 @@ export default function DraftPage() {
     let [error, setError] = useState(null);
     let [username, setUsername] = useState(localStorage.getItem('spellbooks-username') || '');
     let [deckname, setDeckname] = useState('draft deck');
-    let location = useLocation();
+    let navigate = useNavigate();
 
     const showErrorToast = (message) => {
         setError(message);
@@ -203,11 +204,11 @@ export default function DraftPage() {
                             <Button variant="contained" onClick={() => submit(deck, username, deckname, showErrorToast)}>Save Deck</Button>
                         </Grid>
                         <Grid item>
-                            <Button variant="contained" onClick={() => { submit(deck, username, deckname, showErrorToast); newGame(window.location.assign, username, deckname) }}>New Game With Deck</Button>
+                            <Button variant="contained" onClick={() => { submit(deck, username, deckname, showErrorToast); newGame(navigate, username, deckname) }}>New Game With Deck</Button>
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid item>
+                {drafting.length != 0 && <Grid item>
                     <Grid container direction="row" spacing={2}>
                         {drafting.map((card, i) => (
                             <Grid item key={i}>
@@ -222,14 +223,13 @@ export default function DraftPage() {
                             </Grid>
                         ))}
                     </Grid>
-                </Grid>
-
+                </Grid>}
                 {deck.length != 0 && <Grid item>
-                    <Grid container direction="row" spacing={10}>
+                    <Grid container direction="row">
                         <Grid item>
                             <Histogram data={deck.map(card => card['mana_cost'])} initial={initialCurve()} />
                         </Grid>
-                        <Grid item>
+                        <Grid item style={{ marginLeft: '70px' }}>
                             <Histogram data={elementsData()} initial={initialElements()} />
                         </Grid>
                     </Grid>
