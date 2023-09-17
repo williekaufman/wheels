@@ -4,7 +4,7 @@ from flask import Flask, jsonify, request, make_response, render_template
 from flask_socketio import SocketIO, send, emit, join_room, leave_room
 from flask_cors import CORS, cross_origin
 from secrets import compare_digest, token_hex
-from redis_utils import rget_json, rset_json, rset, rget
+from redis_utils import redis, rget_json, rset_json, rset, rget
 import traceback
 from functools import wraps
 from engineio.payload import Payload
@@ -290,7 +290,7 @@ def delete_deck(deckname):
     if username is None:
         return { "error": "No username" }
     remove_deck(username, deckname)
-    rset(f"decks:{username}:{deckname}", None)
+    redis.delete(f"decks:{username}:{deckname}")
     return jsonify({"success": True})
 
 @app.route('/decks', methods=['GET'])

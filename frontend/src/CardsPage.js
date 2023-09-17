@@ -368,7 +368,7 @@ export default function CardsPage() {
                         <Grid item>
                             <Button disabled={draftingModalOpen || !deckname} variant="contained" onClick={() => submit(deck, username, deckname, setDecks, showErrorToast)}>Submit</Button>
                         </Grid> <Grid item>
-                            <Button disabled={draftingModalOpen || !deckname} variant="contained" onClick={() => deleteDeck(deckname, setDeckname, username, setDeck, setDecks, showErrorToast)}>Delete</Button>
+                            <Button disabled={draftingModalOpen || !deckname || decks.every(deck => deck !== deckname)} variant="contained" onClick={() => deleteDeck(deckname, setDeckname, username, setDeck, setDecks, showErrorToast)}>Delete</Button>
                         </Grid> <Grid item>
                             <Button disabled={draftingModalOpen || !deckname || !deck.length} variant="contained" onClick={() => { submit(deck, username, deckname, setDecks, showErrorToast); newGame(navigate, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
                         </Grid> <Grid item>
@@ -376,7 +376,7 @@ export default function CardsPage() {
                         </Grid>
                     </Grid>
                 </Grid>
-                {decks && <Grid item>
+                {decks.length !== 0 && <Grid item>
                     <Paper style={{ padding: '10px', backgroundColor: 'lightblue' }}>
                         <Grid container spacing={2}>
                             {decks.map((deck, i) => (
