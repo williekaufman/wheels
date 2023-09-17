@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 import Toast from './Toast.js';
 import { fetchWrapper } from './GamePage.js';
 import Box from '@mui/material/Box';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 function submit(deck, username, deckname, showErrorToast) {
     fetchWrapper(`${URL}/decks`, { 'deck': deck, 'username': username, 'deckname': deckname }, 'POST')
@@ -74,7 +74,13 @@ function Histogram({ data, initial }) {
     )
 }
 
+function useQuery() {
+    return new URLSearchParams(useLocation().search);
+}
+ 
+
 export default function DraftPage() {
+    let query = useQuery();
     let [cards, setCards] = useState();
     let [deck, setDeck] = useState([]);
     let [drafting, setDrafting] = useState([]);
@@ -83,6 +89,9 @@ export default function DraftPage() {
     let [username, setUsername] = useState(localStorage.getItem('spellbooks-username') || '');
     let [deckname, setDeckname] = useState('draft deck');
     let navigate = useNavigate();
+    
+    const numChoices = query.get("numChoices") || 5;
+    const deckSize = query.get("decksize") || 20;
 
     const showErrorToast = (message) => {
         setError(message);
@@ -102,7 +111,6 @@ export default function DraftPage() {
             })
             .then((data) => {
                 setCards(data['cards']);
-                console.log(data['cards'])
                 drawRandomCards(data['cards']);
                 setLoading(false);
             })
@@ -112,16 +120,11 @@ export default function DraftPage() {
             });
     }, []);
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
-
     function drawRandomCards(x) {
-        console.log(x || cards);
         const randomCards = [];
         const copy = (x || cards).slice();
 
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < numChoices; i++) {
             const index = Math.floor(Math.random() * copy.length);
             randomCards.push(copy[index]);
             copy.splice(index, 1);
@@ -132,13 +135,16 @@ export default function DraftPage() {
 
     function addToDeck(card) {
         setDeck(prevDeck => [...prevDeck, card]);
+   }
 
-        if (deck.length < 19) {
-            drawRandomCards();
-        } else {
+    useEffect(() => {
+        if (deck.length >= deckSize) {
             setDrafting([]);
+            return;
         }
-    }
+
+        cards && cards.length !== 0 && drawRandomCards();
+    }, [deck]);
 
     function initialCurve() {
         const curve = {};
@@ -157,6 +163,10 @@ export default function DraftPage() {
             'fire': 0,
             'water': 0,
         }
+    }
+
+    if (loading) {
+        return <div>Loading...</div>;
     }
 
     function elementsData() {
@@ -208,7 +218,7 @@ export default function DraftPage() {
                         </Grid>
                     </Grid>
                 </Grid>
-                {drafting.length != 0 && <Grid item>
+                {drafting.length !== 0 && <Grid item>
                     <Grid container direction="row" spacing={2}>
                         {drafting.map((card, i) => (
                             <Grid item key={i}>
@@ -224,7 +234,7 @@ export default function DraftPage() {
                         ))}
                     </Grid>
                 </Grid>}
-                {deck.length != 0 && <Grid item>
+                {deck.length !== 0 && <Grid item>
                     <Grid container direction="row">
                         <Grid item>
                             <Histogram data={deck.map(card => card['mana_cost'])} initial={initialCurve()} />

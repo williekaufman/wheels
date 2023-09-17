@@ -442,12 +442,10 @@ export default function GamePage() {
 
     const [spins, setSpins] = useState(3);
 
-    const location = useLocation();
-
     const { game } = useParams();
     const navigate = useNavigate();
 
-    const queryParams = new URLSearchParams(location.search);
+    const queryParams = new URLSearchParams(useLocation().search);
     const playerNum = queryParams.get('playerNum') === "2" ? 2 : 1;
 
 

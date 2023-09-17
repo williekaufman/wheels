@@ -7,6 +7,8 @@ import Toast from './Toast.js';
 import { useNavigate } from 'react-router-dom';
 import Paper from '@mui/material/Paper';
 import { fetchWrapper } from './GamePage.js';
+import { useRef } from 'react';
+import { useCallback } from 'react';
 
 function addToDeck(card, deck, setDeck) {
     setDeck([...deck, card]);
@@ -90,6 +92,134 @@ function joinGame(navigate, gameId, username, deckname, showErrorToast) {
         );
 }
 
+function draft(navigate, numChoices, decksize) {
+    let url = '/draft?' + new URLSearchParams({ numChoices: numChoices, decksize: decksize });
+    navigate(url);
+}
+
+function draftButtonDisabled(numChoices, decksize) {
+    return isNaN(numChoices) || isNaN(decksize) || numChoices < 1 || decksize < 1;
+}
+
+
+
+function DraftingModal({ navigate, setDraftingModalOpen, numChoices, setNumChoices, decksize, setDecksize }) {
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') {
+                setDraftingModalOpen(false);
+            } if (event.key === 'Enter') {
+                draft(navigate, numChoices, decksize);
+            }
+        };
+
+        const handleClickOutside = (event) => {
+            if (modalRef.current && !modalRef.current.contains(event.target)) {
+                setDraftingModalOpen(false);
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('mousedown', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [setDraftingModalOpen]);
+
+    const modalRef = useRef(null);
+
+    const handleDecksize = useCallback((e) => {
+        setDecksize(e.target.value);
+    }, [setDecksize]);
+
+    const handleNumChoices = useCallback((e) => {
+        setNumChoices(e.target.value);
+    }, [setNumChoices]);
+
+    return (
+        <div style={styles.overlay}>
+            <div ref={modalRef} style={styles.modal}>
+                <div style={styles.inputGroup}>
+                    <label>
+                        Number of Choices:
+                        <input
+                            value={numChoices}
+                            onChange={handleNumChoices}
+                            style={styles.input}
+                        />
+                    </label>
+                </div>
+                <div style={styles.inputGroup}>
+                    <label>
+                        Deck Size:
+                        <input
+                            value={decksize}
+                            onChange={handleDecksize}
+                            style={styles.input}
+                        />
+                    </label>
+                </div>
+                <div>
+                    <Grid container direction="row" justifyContent="space-between">
+                        <Grid item>
+                            <Button
+                                variant="contained"
+                                onClick={() => setDraftingModalOpen(false)}
+                            >
+                                Close
+                            </Button>
+                        </Grid>
+                        <Grid item>
+                            <Button
+                                disabled={draftButtonDisabled(numChoices, decksize)}
+                                onClick={() => draft(navigate, numChoices, decksize)}
+                                variant="contained"
+                            >
+                                Submit
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+const styles = {
+    overlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modal: {
+        padding: '20px',
+        maxWidth: '400px',
+        background: '#fff',
+        borderRadius: '8px',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+        zIndex: 10,
+    },
+    inputGroup: {
+        marginBottom: '10px',
+        zIndex: 10
+    },
+    input: {
+        marginLeft: '10px',
+        padding: '5px',
+        borderRadius: '4px',
+        border: '1px solid #ccc'
+    },
+};
+
+
 export default function CardsPage() {
     const [cards, setCards] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -100,6 +230,9 @@ export default function CardsPage() {
     const [deckname, setDeckname] = useState('');
     const [cardnameFilter, setCardnameFilter] = useState('');
     const [elementFilter, setElementFilter] = useState();
+    const [numChoices, setNumChoices] = useState(5);
+    const [decksize, setDecksize] = useState(20);
+    const [draftingModalOpen, setDraftingModalOpen] = useState(false);
     const navigate = useNavigate();
 
     const setDeckFromName = (deckname) => {
@@ -156,7 +289,7 @@ export default function CardsPage() {
                 setLoading(false);
             });
     }, []);
-   
+
     const elements = ['fire', 'water', 'earth', 'air'];
 
     function filterByNames(card) {
@@ -191,6 +324,14 @@ export default function CardsPage() {
     return (
         <div>
             {error && <Toast message={error} onClose={() => setError(null)} />}
+            {draftingModalOpen && <DraftingModal
+                navigate={navigate}
+                setDraftingModalOpen={setDraftingModalOpen}
+                numChoices={numChoices}
+                setNumChoices={setNumChoices}
+                decksize={decksize}
+                setDecksize={setDecksize}
+            />}
             <Grid container direction="column" spacing={2} padding="20px">
                 <Grid item>
                     <label> Username: </label>
@@ -228,16 +369,19 @@ export default function CardsPage() {
                     </select>
                     <Grid container direction="row" spacing={2} style={{ marginTop: '0px' }}>
                         <Grid item>
-                            <Button disabled={!deck.length} variant="contained" onClick={() => setDeck([])}>Clear Deck</Button>
+                            <Button disabled={draftingModalOpen} variant="contained" onClick={() => setDraftingModalOpen(true)}>Draft</Button>
                         </Grid>
                         <Grid item>
-                            <Button disabled={!deckname} variant="contained" onClick={() => submit(deck, username, deckname, setDecks, showErrorToast)}>Submit</Button>
+                            <Button disabled={draftingModalOpen || !deck.length} variant="contained" onClick={() => setDeck([])}>Clear Deck</Button>
+                        </Grid>
+                        <Grid item>
+                            <Button disabled={draftingModalOpen || !deckname} variant="contained" onClick={() => submit(deck, username, deckname, setDecks, showErrorToast)}>Submit</Button>
                         </Grid> <Grid item>
-                            <Button disabled={!deckname} variant="contained" onClick={() => deleteDeck(deckname, setDeckname, username, setDeck, setDecks, showErrorToast)}>Delete</Button>
+                            <Button disabled={draftingModalOpen || !deckname} variant="contained" onClick={() => deleteDeck(deckname, setDeckname, username, setDeck, setDecks, showErrorToast)}>Delete</Button>
                         </Grid> <Grid item>
-                            <Button disabled={!deckname || !deck.length} variant="contained" onClick={() => { submit(deck, username, deckname, setDecks, showErrorToast); newGame(navigate, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
+                            <Button disabled={draftingModalOpen || !deckname || !deck.length} variant="contained" onClick={() => { submit(deck, username, deckname, setDecks, showErrorToast); newGame(navigate, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
                         </Grid> <Grid item>
-                            <Button disabled={!deckname || !deck.length} variant="contained" onClick={() => { submit(deck, username, deckname, setDecks, showErrorToast); joinGame(navigate, prompt('Enter Game Id'), username, deckname, showErrorToast) }}>{deckname ? `Join Game With ${deckname}` : 'Name deck to use'}</Button>
+                            <Button disabled={draftingModalOpen || !deckname || !deck.length} variant="contained" onClick={() => { submit(deck, username, deckname, setDecks, showErrorToast); joinGame(navigate, prompt('Enter Game Id'), username, deckname, showErrorToast) }}>{deckname ? `Join Game With ${deckname}` : 'Name deck to use'}</Button>
                         </Grid>
                     </Grid>
                 </Grid>
@@ -246,7 +390,7 @@ export default function CardsPage() {
                         <Grid container spacing={2}>
                             {decks.map((deck, i) => (
                                 <Grid item key={i}>
-                                    <Button variant="contained" style={{ backgroundColor: deck === deckname ? 'red' : 'blue' }} onClick={() => setDeckFromName(deck)}>{deck}</Button>
+                                    <Button disabled={draftingModalOpen} variant="contained" style={draftingModalOpen ? {} : { backgroundColor: deck === deckname ? 'red' : 'blue' }} onClick={() => setDeckFromName(deck)}>{deck}</Button>
                                 </Grid>
                             ))}
                         </Grid>
