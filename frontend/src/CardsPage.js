@@ -366,7 +366,7 @@ export default function CardsPage() {
                             <Button disabled={draftingModalOpen || !deck.length} variant="contained" onClick={() => setDeck([])}>Clear Deck</Button>
                         </Grid>
                         <Grid item>
-                            <Button disabled={draftingModalOpen || !deckname} variant="contained" onClick={() => submit(deck, username, deckname, setDecks, showErrorToast)}>Submit</Button>
+                            <Button disabled={draftingModalOpen || !deckname || !deck.length} variant="contained" onClick={() => submit(deck, username, deckname, setDecks, showErrorToast)}>Submit</Button>
                         </Grid> <Grid item>
                             <Button disabled={draftingModalOpen || !deckname || decks.every(deck => deck !== deckname)} variant="contained" onClick={() => deleteDeck(deckname, setDeckname, username, setDeck, setDecks, showErrorToast)}>Delete</Button>
                         </Grid> <Grid item>
