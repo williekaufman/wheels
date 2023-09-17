@@ -8,7 +8,6 @@ import { useNavigate } from 'react-router-dom';
 import Paper from '@mui/material/Paper';
 import { fetchWrapper } from './GamePage.js';
 import { useRef } from 'react';
-import { useCallback } from 'react';
 
 function addToDeck(card, deck, setDeck) {
     setDeck([...deck, card]);
@@ -126,17 +125,9 @@ function DraftingModal({ navigate, setDraftingModalOpen, numChoices, setNumChoic
             document.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [setDraftingModalOpen]);
+    }, [setDraftingModalOpen, decksize, navigate, numChoices]);
 
     const modalRef = useRef(null);
-
-    const handleDecksize = useCallback((e) => {
-        setDecksize(e.target.value);
-    }, [setDecksize]);
-
-    const handleNumChoices = useCallback((e) => {
-        setNumChoices(e.target.value);
-    }, [setNumChoices]);
 
     return (
         <div style={styles.overlay}>
@@ -146,7 +137,7 @@ function DraftingModal({ navigate, setDraftingModalOpen, numChoices, setNumChoic
                         Number of Choices:
                         <input
                             value={numChoices}
-                            onChange={handleNumChoices}
+                            onChange={(e) => setNumChoices(e.target.value)}
                             style={styles.input}
                         />
                     </label>
@@ -156,7 +147,7 @@ function DraftingModal({ navigate, setDraftingModalOpen, numChoices, setNumChoic
                         Deck Size:
                         <input
                             value={decksize}
-                            onChange={handleDecksize}
+                            onChange={(e) => setDecksize(e.target.value)}
                             style={styles.input}
                         />
                     </label>
