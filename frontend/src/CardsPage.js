@@ -19,44 +19,43 @@ function removeFromDeck(index, deck, setDeck) {
 
 function submit(deck, username, deckname, setDecks, showErrorToast) {
     fetchWrapper(`${URL}/decks`, { 'deck': deck, 'username': username, 'deckname': deckname }, 'POST')
+        .then((res) => res.json())    
         .then((response) => {
             if (response['error']) {
                 showErrorToast(response['error']);
             }
             getDecks(username, setDecks, showErrorToast);
-            return response.json();
+            return response;
         }
         )
 }
 
 function deleteDeck(deckname, setDeckname, username, setDeck, setDecks, showErrorToast) {
     fetchWrapper(`${URL}/decks/delete/${deckname}`, { 'username': username }, 'POST')
+        .then((res) => res.json())
         .then((response) => {
             if (response['error']) {
                 showErrorToast(response['error']);
+                return;
             }
             getDecks(username, setDecks, showErrorToast);
             setDeck([]);
             setDeckname('');
-            return response.json();
         }
         )
 }
 
 function getDecks(username, setDecks, showErrorToast) {
     fetchWrapper(`${URL}/decks`, { 'username': username }, 'GET')
+        .then((res) => res.json())
         .then((response) => {
             if (response['error']) {
                 showErrorToast(response['error']);
                 return;
             }
-            return response.json();
+            setDecks(response['decks'])
         }
         )
-        .then((data) => {
-            setDecks(data['decks']);
-        }
-        );
 }
 
 
@@ -217,6 +216,7 @@ export default function CardsPage() {
     const [error, setError] = useState(null);
     const [deck, setDeck] = useState([]);
     const [decks, setDecks] = useState([]);
+    const [starterDecks, setStarterDecks] = useState([]);
     const [username, setUsername] = useState(localStorage.getItem('spellbooks-username') || '');
     const [deckname, setDeckname] = useState('');
     const [cardnameFilter, setCardnameFilter] = useState('');
@@ -262,6 +262,18 @@ export default function CardsPage() {
         return () => clearInterval(interval);
     }, [username]);
 
+    useEffect(() => {
+        fetchWrapper(`${URL}/starter_decks`, {}, 'GET')
+            .then((response) => {
+                if (response['error']) {
+                    showErrorToast(response['error']);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                setStarterDecks(data['decks']);
+            })
+    })
 
     useEffect(() => {
         fetchWrapper(`${URL}/cards`, {}, 'GET')
@@ -306,6 +318,17 @@ export default function CardsPage() {
             return card.elements.includes(elementFilter) && !neutral;
         }
         return true;
+    }
+
+    function bgColor(x) {
+        if (draftingModalOpen) {
+            return
+        }
+        if (x === deckname) {
+            return 'red';
+        } if (starterDecks && starterDecks.includes(x)) {
+            return 'orange';
+        }
     }
 
     if (loading) {
@@ -381,7 +404,7 @@ export default function CardsPage() {
                         <Grid container spacing={2}>
                             {decks.map((deck, i) => (
                                 <Grid item key={i}>
-                                    <Button disabled={draftingModalOpen} variant="contained" style={draftingModalOpen || deck !== deckname ? {} : { backgroundColor: 'red' }} onClick={() => setDeckFromName(deck)}>{deck}</Button>
+                                    <Button disabled={draftingModalOpen} variant="contained" style={bgColor(deck) ? { backgroundColor: bgColor(deck)} : {}} onClick={() => setDeckFromName(deck)}>{deck}</Button>
                                 </Grid>
                             ))}
                         </Grid>
@@ -391,9 +414,8 @@ export default function CardsPage() {
                     <Paper style={{ padding: '10px', backgroundColor: 'lightyellow' }}>
                         <Grid container direction="row" spacing={2}>
                             {deck.map((card, i) => (
-                                <Grid item>
+                                <Grid item key={i}>
                                     <Slot
-                                        key={i}
                                         card={card}
                                         highlight={false}
                                         elements={card['elements']}

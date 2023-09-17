@@ -11,7 +11,7 @@ from engineio.payload import Payload
 from player import Player, PlayerNumber, handle_turn, Result
 from element import Element
 from card import starting_wheels, Card
-from cards import cards
+from cards import cards, starter_decks
 
 Payload.max_decode_packets = 100
 
@@ -93,10 +93,12 @@ def remove_deck(username, deckname):
     rset_json(f"decks:{username}", current_decks)
     
 def get_deck(username, deckname):
+    if (starter_deck := starter_decks().get(deckname)):
+        return [Card.to_json(card) for card in starter_deck]
     return rget_json(f"decks:{username}:{deckname}")
 
 def get_all_decks(username):
-    return rget_json(f"decks:{username}") or []
+    return list(starter_decks().keys()) + (rget_json(f"decks:{username}") or [])
 
 @app.route("/cards", methods=["GET"])
 @api_endpoint
@@ -257,6 +259,13 @@ def submit():
         "opponent": opponent and opponent.to_json(),
     })
     
+@app.route('/starter_decks', methods=['GET'])
+@api_endpoint
+def get_starter_decks():
+    return jsonify({
+        "decks": list(starter_decks().keys())
+    }) 
+    
 @app.route('/decks', methods=['POST'])
 @api_endpoint
 def push_deck():
@@ -269,6 +278,8 @@ def push_deck():
         return { "error": "No deckname" } 
     if deck is None:
         return { "error": "No deck" }
+    if deckname in starter_decks():
+        return { "error": "Can't overwrite starter deck" }
     rset_json(f"decks:{username}:{deckname}", deck)
     add_deck(username, deckname)
     return jsonify({"success": True})
@@ -289,6 +300,8 @@ def delete_deck(deckname):
     username = request.json.get('username')
     if username is None:
         return { "error": "No username" }
+    if deckname in starter_decks():
+        return { "error": "Can't delete starter deck" }
     remove_deck(username, deckname)
     redis.delete(f"decks:{username}:{deckname}")
     return jsonify({"success": True})

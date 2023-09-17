@@ -295,4 +295,11 @@ def cards():
         pass
     return default_cards()
 
-     
+    
+def starter_decks():
+    return {
+        "air": air_spells + mana_spells + exp_spells + draw_spells,
+        "earth": earth_spells + mana_spells + exp_spells + draw_spells,
+        "fire": fire_spells + mana_spells + exp_spells + draw_spells,
+        "water": water_spells + mana_spells + exp_spells + draw_spells,
+    } 
