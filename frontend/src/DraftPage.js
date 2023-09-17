@@ -224,6 +224,9 @@ export default function DraftPage() {
                         <Grid item>
                             <Button variant="contained" onClick={() => { submit(deck, username, deckname, showErrorToast); newGame(navigate, username, deckname) }}>New Game With Deck</Button>
                         </Grid>
+                        <Grid item>
+                            <Button variant="contained" onClick={() => navigate('/')}>Back to Home</Button>
+                        </Grid>
                     </Grid>
                 </Grid>
                 {drafting.length !== 0 && <Grid item>
