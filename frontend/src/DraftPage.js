@@ -15,6 +15,7 @@ function submit(deck, username, deckname, showErrorToast) {
             if (response['error']) {
                 showErrorToast(response['error']);
             }
+            showErrorToast('Deck saved!', 'success');
             return response.json();
         }
         )
@@ -86,6 +87,7 @@ export default function DraftPage() {
     let [drafting, setDrafting] = useState([]);
     let [loading, setLoading] = useState(true);
     let [error, setError] = useState(null);
+    let [toastType, setToastType] = useState('error');
     let [username, setUsername] = useState(localStorage.getItem('spellbooks-username') || '');
     let [deckname, setDeckname] = useState('draft deck');
     let navigate = useNavigate();
@@ -93,8 +95,10 @@ export default function DraftPage() {
     const numChoices = query.get("numChoices") || 5;
     const deckSize = query.get("decksize") || 20;
 
-    const showErrorToast = (message) => {
+    const showErrorToast = (message, type) => {
         setError(message);
+
+        setToastType(type || 'error')
 
         setTimeout(() => {
             setError(null);
@@ -187,7 +191,11 @@ export default function DraftPage() {
 
     return (
         <div>
-            {error && <Toast message={error} onClose={() => setError(null)} />}
+            {error && <Toast 
+            style={
+                toastType === 'success' ? { backgroundColor: 'green' } : { backgroundColor: 'red' }
+            }
+            message={error} onClose={() => setError(null)} />}
             <Grid container direction="column" spacing={2} padding="20px">
                 <Grid item>
                     <Grid container direction="row" spacing={2}>
