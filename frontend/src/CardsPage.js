@@ -381,48 +381,53 @@ export default function CardsPage() {
                         <Grid container spacing={2}>
                             {decks.map((deck, i) => (
                                 <Grid item key={i}>
-                                    <Button disabled={draftingModalOpen} variant="contained" style={draftingModalOpen ? {} : { backgroundColor: deck === deckname ? 'red' : 'blue' }} onClick={() => setDeckFromName(deck)}>{deck}</Button>
+                                    <Button disabled={draftingModalOpen} variant="contained" style={draftingModalOpen || deck !== deckname ? {} : { backgroundColor: 'red' }} onClick={() => setDeckFromName(deck)}>{deck}</Button>
                                 </Grid>
                             ))}
                         </Grid>
                     </Paper>
                 </Grid>}
+                {deck.length !== 0 && <Grid item>
+                    <Paper style={{ padding: '10px', backgroundColor: 'lightyellow' }}>
+                        <Grid container direction="row" spacing={2}>
+                            {deck.map((card, i) => (
+                                <Grid item>
+                                    <Slot
+                                        key={i}
+                                        card={card}
+                                        highlight={false}
+                                        elements={card['elements']}
+                                        lock={false}
+                                        basic={false}
+                                        onClick={() => removeFromDeck(deck.indexOf(card), deck, setDeck)}
+                                    />
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Paper>
+                </Grid>}
+
                 <Grid item>
-                    <Grid container direction="row" spacing={2}>
-                        {cards.map((card, i) => (
-                            filterByNames(card) && filterByElements(card) &&
-                            <Grid item key={i}>
-                                <Slot
-                                    card={card}
-                                    highlight={false}
-                                    elements={card['elements']}
-                                    lock={false}
-                                    basic={false}
-                                    onClick={() => addToDeck(card, deck, setDeck)}
-                                />
-                            </Grid>
-                        ))}
-                    </Grid>
-                </Grid>
-                <Grid item>
-                    <h2>Deck</h2>
-                </Grid>
-                <Grid item>
-                    <Grid container direction="row" spacing={2}>
-                        {deck.map((card, i) => (
-                            <Grid item>
-                                <Slot
-                                    key={i}
-                                    card={card}
-                                    highlight={false}
-                                    elements={card['elements']}
-                                    lock={false}
-                                    basic={false}
-                                    onClick={() => removeFromDeck(deck.indexOf(card), deck, setDeck)}
-                                />
-                            </Grid>
-                        ))}
-                    </Grid>
+                    <Paper style={{ padding: '10px', backgroundColor: 'lightgreen' }}>
+                        <Grid container direction="row" spacing={2}>
+                            {cards.map((card, i) => (
+                                filterByNames(card) && filterByElements(card) &&
+                                <Grid item key={i}>
+                                    <Slot
+                                        card={card}
+                                        highlight={false}
+                                        elements={card['elements']}
+                                        lock={false}
+                                        basic={false}
+                                        onClick={() => addToDeck(card, deck, setDeck)}
+                                    />
+                                </Grid>
+                            ))}
+                            {cards.filter(filterByNames).filter(filterByElements).length === 0 && <Grid item>
+                                <label> No results </label>
+                            </Grid>}
+                        </Grid>
+                    </Paper>
                 </Grid>
             </Grid>
         </div>

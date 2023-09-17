@@ -8,7 +8,7 @@ air_spells = [
         2,
         "Air Swipe",
         [Effect(EffectType.BLOCK, 2), Effect(EffectType.DAMAGE, 1)],
-        [Element.AIR]    
+        [Element.AIR] 
     ),
     Card(
         4,
@@ -56,7 +56,7 @@ fire_spells = [
         [Element.FIRE],
     ),
     Card(
-        5,
+        4,
         "Inner Fire",
         [Effect(EffectType.SPELL_DAMAGE, 6)],
         [Element.FIRE],
@@ -76,6 +76,12 @@ fire_spells = [
 ]
 
 earth_spells = [
+    Card(
+        3,
+        "Close Combat",
+        [Effect(EffectType.HEAL, -2), Effect(EffectType.DAMAGE, 5)],
+        [Element.EARTH] 
+    ),
     Card(
         2,
         "Earth Cocoon",
@@ -111,12 +117,6 @@ water_spells = [
         [Element.WATER]
     ),
     Card(
-        4,
-        "Drain Life",
-        [Effect(EffectType.HEAL, 2), Effect(EffectType.DAMAGE, 2)],
-        [Element.WATER]
-    ),
-    Card(
         7,
         "Tsunami",
         [Effect(EffectType.DAMAGE, 4)],
@@ -133,10 +133,16 @@ water_spells = [
         "Splash",
         [Effect(EffectType.DAMAGE, 0)],
         [Element.WATER]
-    )
+    ),
 ]
 
 two_color_spells = [
+    Card(
+        3,
+        "Leap",
+        [Effect(EffectType.DAMAGE_REDUCTION, 1), Effect(EffectType.BLOCK, 2), Effect(EffectType.SPELL_DAMAGE, 1)],
+        [Element.AIR, Element.EARTH]
+    ),
     Card(
         6,
         "Ferrous Wheel",
