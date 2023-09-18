@@ -8,8 +8,6 @@ function Diff({ diff, header }) {
         padding: '0px 0',
     };
 
-    console.log(diff);
-
     return (
         <div>
             <div style={{ fontWeight: 'bold' }}> {header} </div>

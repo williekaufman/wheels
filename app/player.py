@@ -22,9 +22,9 @@ def resolve_wheel(player, opponent, element):
     return card, f'{time}:{player.username}:{element.value}:{log}'
 
 def check_game_over(player, opponent):
-    if player.life <= 0:
-        return Result.TIE if opponent.life <= 0 else Result.PLAYER_TWO
-    return Result.PLAYER_ONE if opponent.life <= 0 else None
+    if player.get('life') <= 0:
+        return Result.TIE if opponent.get('life') <= 0 else Result.PLAYER_TWO
+    return Result.PLAYER_ONE if opponent.get('life') <= 0 else None
 
 def handle_turn(player, opponent):
     logs = []
@@ -59,61 +59,80 @@ class PlayerNumber(Enum):
     def other(self):
         return PlayerNumber(3 - self.value)
 
+def fresh_state():
+    return {
+        'spell_damage': 0,
+        'damage_reduction': 0,
+        'block': 0,
+        'spins': 3,
+    }
+
 class Player():
-    def __init__(self, deck, wheels, username, life=20, mana=0, block=0, damage_reduction=0, experience=0, focus=0, spell_damage=0, hand=[], spins=3):
+    def __init__(
+        self, 
+        deck, 
+        wheels, 
+        username, 
+        hand=[], 
+        permanent_state={
+            'life': 20,
+            'mana': 0,
+            'experience': 0,
+            'focus': 0,
+            }, 
+        state=fresh_state()):
         deck = [card for card in deck]
         random.shuffle(deck)
-        self.wheels = wheels.copy()
-        self.username = username
-        self.life = life
-        self.mana = mana
-        self.block = block
-        self.damage_reduction = damage_reduction
-        self.experience = experience
-        self.focus = focus
-        self.spell_damage = spell_damage
-        self.hand = [card for card in hand]
         self.deck = deck
-        self.spins = spins
-  
+        self.hand = [card for card in hand]
+        self.wheels = wheels.copy()
+        self.permament_state = permanent_state
+        self.state = state
+        self.username = username
+
+    def get(self, key):
+        if self.state.get(key) is not None:
+            return self.state[key]
+        return self.permament_state.get(key) or 0
+    
+    def set(self, key, value):
+        if self.state.get(key) is not None:
+            self.state[key] = value
+        else:
+            self.permament_state[key] = value
+    
+    def add(self, key, value):
+        if self.state.get(key) is not None:
+            self.state[key] += value
+        else:
+            self.permament_state[key] += value
+    
     def diff(self, other):
         return {
-            'life': self.life - other.life,
-            'mana': self.mana - other.mana,
-            'focus': self.focus - other.focus,
-            'experience': self.experience - other.experience,
+            'life': self.get('life') - other.get('life'),
+            'mana': self.get('mana') - other.get('mana'),
+            'focus': self.get('focus') - other.get('focus'),
+            'experience': self.get('experience') - other.get('experience'),
         }
    
     def to_json(self):
         return {
-            "life": self.life,
-            "mana": self.mana,
-            "block": self.block,
-            "damage_reduction": self.damage_reduction,
-            "experience": self.experience,
-            "focus": self.focus,
-            "spell_damage": self.spell_damage,
-            "hand": [card.to_json() for card in self.hand],
             "deck": [card.to_json() for card in self.deck],
+            "hand": [card.to_json() for card in self.hand],
             "wheels": {e.value: wheel.to_json() for e, wheel in self.wheels.items()},
             "username": self.username,
-            "spins": self.spins
+            "state": self.state,
+            "permanentState": self.permament_state,
         }
         
     def of_json(json):
         args = {
-            "username": json["username"],
-            "life": json["life"],
-            "mana": json["mana"],
-            "block": json["block"],
-            "damage_reduction": json["damage_reduction"],
-            "experience": json["experience"],
-            "focus": json["focus"],
-            "spell_damage": json["spell_damage"],
-            "hand": [Card.of_json(card) for card in json["hand"]],
-            "deck": [Card.of_json(card) for card in json["deck"]],
+            "deck": [Card.of_json(card) for card in json["deck"]], 
+            "hand": [Card.of_json(card) for card in json["hand"]], 
             "wheels": {Element(e): Wheel.of_json(wheel) for e, wheel in json["wheels"].items()},
-            "spins": json["spins"]
+            "username": json["username"],
+            "state": json["state"],
+            "permanent_state": json["permanentState"],
         }
         return Player(**args)
     
@@ -126,12 +145,11 @@ class Player():
             self.deck and self.hand.append(self.deck.pop())
       
     def new_turn(self):
-        self.block = 0
-        self.damage_reduction = 0
         for wheel in self.wheels.values():
             wheel.spin()
-        self.spins = 3 + self.experience
-        self.mana += self.focus
+        self.permament_state['mana'] += self.get('focus')
+        self.state = fresh_state()
+        self.state['spins'] = 3 + self.get('experience') 
         self.draw()
    
     def finish_turn(self, opponent):
@@ -141,42 +159,27 @@ class Player():
             wheel.spin()
         self.new_turn()
         return log
-       
-    def gain_life(self, amount):
-        self.life += amount
-        
+
+    def gain(self, key, amount):
+        if self.state.get(key) is not None:
+            self.state[key] += amount
+        else:
+            self.permament_state[key] += amount
+
     def take_damage(self, amount):
-        amount = max(0, amount - self.damage_reduction)
-        if self.block >= amount:
-            self.block -= amount
+        amount = max(0, amount - self.get('damage_reduction'))
+        if self.get('block') >= amount:
+            self.add('block', -amount)
             return amount
         else:
-            ret = self.block
-            self.life -= amount - self.block
-            self.block = 0
+            ret = self.get('block')
+            self.add('life', -(amount - ret))
+            self.set('block', 0)
             return ret
     
     def pay_mana(self, amount):
-        if self.mana >= amount:
-            self.mana -= amount
+        if self.get('mana') >= amount:
+            self.add('mana', -amount)
             return True
         else:
             return False
-    
-    def gain_mana(self, amount):
-        self.mana += amount
-        
-    def gain_block(self, amount):
-        self.block += amount
-        
-    def gain_damage_reduction(self, amount):
-        self.damage_reduction += amount
-       
-    def gain_experience(self, amount):
-        self.experience += amount
-        
-    def gain_focus(self, amount):
-        self.focus += amount
-         
-    def gain_spell_damage(self, amount):
-        self.spell_damage += amount

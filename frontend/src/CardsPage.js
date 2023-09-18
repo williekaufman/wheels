@@ -99,6 +99,73 @@ function draftButtonDisabled(numChoices, decksize) {
     return isNaN(numChoices) || isNaN(decksize) || numChoices < 1 || decksize < 1;
 }
 
+function JoinModal({ navigate, username, deckname, deck, setDecks, setJoinModalOpen, showErrorToast }) {
+    let [gameId, setGameId] = useState('');
+
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') {
+                setJoinModalOpen(false);
+            } if (event.key === 'Enter') {
+                submit(deck, username, deckname, setDecks, (e) => null);
+                joinGame(navigate, gameId, username, deckname, showErrorToast);
+            }
+        };
+
+        const handleClickOutside = (event) => {
+            if (modalRef.current && !modalRef.current.contains(event.target)) {
+                setJoinModalOpen(false);
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('mousedown', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [setJoinModalOpen, gameId]);
+
+    const modalRef = useRef(null);
+
+    return (
+        <div style={styles.overlay}>
+            <div ref={modalRef} style={styles.modal}>
+                <div style={styles.inputGroup}>
+                    <label>
+                        Game Id:
+                        <input
+                            style={styles.input}
+                            value={gameId}
+                            onChange={(e) => setGameId(e.target.value)}
+                        />
+                    </label>
+                </div>
+                <div>
+                    <Grid container direction="row" justifyContent="space-between">
+                        <Grid item>
+                            <Button
+                                variant="contained"
+                                onClick={() => setJoinModalOpen(false)}
+                            >
+                                Close
+                            </Button>
+                        </Grid>
+                        <Grid item>
+                            <Button
+                                onClick={() => { submit(deck, username, deckname, setDecks, (e) => null ); joinGame(navigate, gameId, username, deckname, showErrorToast)}}
+                                variant="contained"
+                            >
+                                Submit
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 
 function DraftingModal({ navigate, setDraftingModalOpen, numChoices, setNumChoices, decksize, setDecksize }) {
@@ -224,6 +291,7 @@ export default function CardsPage() {
     const [numChoices, setNumChoices] = useState(5);
     const [decksize, setDecksize] = useState(20);
     const [draftingModalOpen, setDraftingModalOpen] = useState(false);
+    const [joinModalOpen, setJoinModalOpen] = useState(false);
     const navigate = useNavigate();
 
     const setDeckFromName = (deckname) => {
@@ -273,7 +341,7 @@ export default function CardsPage() {
             .then((data) => {
                 setStarterDecks(data['decks']);
             })
-    })
+    }, [])
 
     useEffect(() => {
         fetchWrapper(`${URL}/cards`, {}, 'GET')
@@ -320,8 +388,10 @@ export default function CardsPage() {
         return true;
     }
 
+    let modalOpen = draftingModalOpen || joinModalOpen;
+
     function bgColor(x) {
-        if (draftingModalOpen) {
+        if (modalOpen) {
             return
         }
         if (x === deckname) {
@@ -346,6 +416,16 @@ export default function CardsPage() {
                 decksize={decksize}
                 setDecksize={setDecksize}
             />}
+            {joinModalOpen && <JoinModal
+                navigate={navigate}
+                setJoinModalOpen={setJoinModalOpen}
+                deck={deck}
+                setDecks={setDecks}
+                username={username}
+                deckname={deckname}
+                showErrorToast={showErrorToast}
+                />
+            }
             <Grid container direction="column" spacing={2} padding="20px">
                 <Grid item>
                     <label> Username: </label>
@@ -383,19 +463,19 @@ export default function CardsPage() {
                     </select>
                     <Grid container direction="row" spacing={2} style={{ marginTop: '0px' }}>
                         <Grid item>
-                            <Button disabled={draftingModalOpen} variant="contained" onClick={() => setDraftingModalOpen(true)}>Draft</Button>
+                            <Button disabled={modalOpen} variant="contained" onClick={() => setDraftingModalOpen(true)}>Draft</Button>
                         </Grid>
                         <Grid item>
-                            <Button disabled={draftingModalOpen || !deck.length} variant="contained" onClick={() => setDeck([])}>Clear Deck</Button>
+                            <Button disabled={modalOpen || !deck.length} variant="contained" onClick={() => setDeck([])}>Clear Deck</Button>
                         </Grid>
                         <Grid item>
-                            <Button disabled={draftingModalOpen || !deckname || !deck.length} variant="contained" onClick={() => submit(deck, username, deckname, setDecks, showErrorToast)}>Submit</Button>
+                            <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => submit(deck, username, deckname, setDecks, showErrorToast)}>Submit</Button>
                         </Grid> <Grid item>
-                            <Button disabled={draftingModalOpen || !deckname || decks.every(deck => deck !== deckname)} variant="contained" onClick={() => deleteDeck(deckname, setDeckname, username, setDeck, setDecks, showErrorToast)}>Delete</Button>
+                            <Button disabled={modalOpen || !deckname || decks.every(deck => deck !== deckname)} variant="contained" onClick={() => deleteDeck(deckname, setDeckname, username, setDeck, setDecks, showErrorToast)}>Delete</Button>
                         </Grid> <Grid item>
-                            <Button disabled={draftingModalOpen || !deckname || !deck.length} variant="contained" onClick={() => { submit(deck, username, deckname, setDecks, showErrorToast); newGame(navigate, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
+                            <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => { submit(deck, username, deckname, setDecks, showErrorToast); newGame(navigate, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
                         </Grid> <Grid item>
-                            <Button disabled={draftingModalOpen || !deckname || !deck.length} variant="contained" onClick={() => { submit(deck, username, deckname, setDecks, showErrorToast); joinGame(navigate, prompt('Enter Game Id'), username, deckname, showErrorToast) }}>{deckname ? `Join Game With ${deckname}` : 'Name deck to use'}</Button>
+                            <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => { setJoinModalOpen(true) }}>{deckname ? `Join Game With ${deckname}` : 'Name deck to use'}</Button>
                         </Grid>
                     </Grid>
                 </Grid>
@@ -404,7 +484,7 @@ export default function CardsPage() {
                         <Grid container spacing={2}>
                             {decks.map((deck, i) => (
                                 <Grid item key={i}>
-                                    <Button disabled={draftingModalOpen} variant="contained" style={bgColor(deck) ? { backgroundColor: bgColor(deck)} : {}} onClick={() => setDeckFromName(deck)}>{deck}</Button>
+                                    <Button disabled={modalOpen} variant="contained" style={bgColor(deck) ? { backgroundColor: bgColor(deck)} : {}} onClick={() => setDeckFromName(deck)}>{deck}</Button>
                                 </Grid>
                             ))}
                         </Grid>

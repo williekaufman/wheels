@@ -43,28 +43,28 @@ class Effect():
         
     def resolve(self, player, opponent):
         if self.type == EffectType.HEAL:
-            player.gain_life(self.value)
+            player.gain('life', self.value)
             return f"Healed {self.value}"
         elif self.type == EffectType.DAMAGE:
-            blocked_damage = opponent.take_damage(self.value + player.spell_damage)
-            return f"Dealt {self.value} base, {player.spell_damage} spell damage, of which {blocked_damage} was blocked"
+            blocked_damage = opponent.take_damage(self.value + player.get('spell_damage'))
+            return f"Dealt {self.value} base, {player.get('spell_damage')} spell damage, of which {blocked_damage} was blocked"
         elif self.type == EffectType.BLOCK:
-            player.gain_block(self.value)
+            player.gain('block', self.value)
             return f"Blocked for {self.value}"
         elif self.type == EffectType.DAMAGE_REDUCTION:
-            player.gain_damage_reduction(self.value)
+            player.gain('damage_reduction', self.value)
             return f"Gained {self.value} damage reduction"
         elif self.type == EffectType.MANA:
-            player.gain_mana(self.value)
+            player.gain('mana', self.value)
             return f"Gained {self.value} mana"
         elif self.type == EffectType.SPELL_DAMAGE:
-            player.gain_spell_damage(self.value)
+            player.gain('spell_damage', self.value)
             return f"Gained {self.value} spell damage"
         elif self.type == EffectType.EXPERIENCE:
-            player.gain_experience(self.value)
+            player.gain('experience', self.value)
             return f"Gained {self.value} experience"
         elif self.type == EffectType.FOCUS:
-            player.gain_focus(self.value)
+            player.gain('focus', self.value)
             return f"Gained {self.value} focus"
         elif self.type == EffectType.DRAW:
             for i in range(self.value):

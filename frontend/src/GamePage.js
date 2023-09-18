@@ -99,7 +99,7 @@ function updateState(gameId, playerNum, showErrorToast, setResult, setLog, setLa
             }
             setPlayerState(data['player']);
             setOpponentState(data['opponent']);
-            setSpins(data['player']['spins']);
+            setSpins(data['player']['state']['spins']);
             setSubmitted(data['submitted']);
             setLastTurn(data['lastTurn']);
             setLog(data['log']);

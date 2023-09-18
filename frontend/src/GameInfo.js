@@ -27,18 +27,18 @@ function GameInfo({ playerState, opponentState }) {
           <div style={{width: '33%', textAlign: 'center'}}>
             <p style={paragraphStyle}>You</p>
             <p style={paragraphStyle}>Cards in hand: {playerState['hand'].length}</p>
-            <p style={paragraphStyle}>Mana: {playerState['mana']}</p>
-            <p style={paragraphStyle}>Focus: {playerState['focus']}</p>
-            <p style={paragraphStyle}>Health: {playerState['life']}</p>
-            <p style={paragraphStyle}>Experience: {playerState['experience']}</p>
+            <p style={paragraphStyle}>Mana: {playerState['permanentState']['mana']}</p>
+            <p style={paragraphStyle}>Focus: {playerState['permanentState']['focus']}</p>
+            <p style={paragraphStyle}>Health: {playerState['permanentState']['life']}</p>
+            <p style={paragraphStyle}>Experience: {playerState['permanentState']['experience']}</p>
           </div>
           {opponentState ? <div style={{width: '33%', textAlign: 'center'}}>
             <p style={paragraphStyle}>Opponent</p>
             <p style={paragraphStyle}>Cards in hand: {opponentState['hand'].length}</p>
-            <p style={paragraphStyle}>Mana: {opponentState['mana']}</p>
-            <p style={paragraphStyle}>Focus: {opponentState['focus']}</p>
-            <p style={paragraphStyle}>Health: {opponentState['life']}</p>
-            <p style={paragraphStyle}>Experience: {opponentState['experience']}</p>
+            <p style={paragraphStyle}>Mana: {opponentState['permanentState']['mana']}</p>
+            <p style={paragraphStyle}>Focus: {opponentState['permanentState']['focus']}</p>
+            <p style={paragraphStyle}>Health: {opponentState['permanentState']['life']}</p>
+            <p style={paragraphStyle}>Experience: {opponentState['permanentState']['experience']}</p>
           </div> : <div style={{width: '33%', textAlign: 'center'}}> Waiting for opponent... </div>}
       </Stack>
     </Paper>

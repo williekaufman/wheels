@@ -186,11 +186,11 @@ def spin():
         return make_response(jsonify({"error": "Invalid player"}), 400)
     if locks is None:
         return make_response(jsonify({"error": "No locks"}), 400)
-    if player.spins <= 0:
+    if player.get('spins') <= 0:
         return make_response(jsonify({"error": "No spins left"}), 400)
     if get_submitted(playerNum, game_id):
         return make_response(jsonify({"error": "Already submitted"}), 400) 
-    player.spins -= 1
+    player.add('spins', -1)
     for element, wheel in player.wheels.items():
         if element.value not in locks:
             wheel.spin()
@@ -227,15 +227,17 @@ def submit():
     except:
         return make_response(jsonify({"error": "Invalid player"}), 400)
     opponentNum = playerNum.other()
-    player = get_player(playerNum, game_id)
-    opponent = get_player(opponentNum, game_id)
+    player_one = get_player(PlayerNumber.ONE, game_id)
+    player_two = get_player(PlayerNumber.TWO, game_id)
+    player = player_one if playerNum == PlayerNumber.ONE else player_two
+    opponent = player_one if playerNum == PlayerNumber.TWO else player_two
     if player is None:
         return make_response(jsonify({"error": "Invalid player"}), 400)
     if get_submitted(playerNum.other(), game_id):
         log = get_log(game_id)
         player_one_copy = get_player(PlayerNumber.ONE, game_id)
         player_two_copy = get_player(PlayerNumber.TWO, game_id)
-        result, cards, new_logs = handle_turn(player, opponent)
+        result, cards, new_logs = handle_turn(player_one, player_two)
         log.extend(new_logs)
         set_log(log, game_id)
         for card in cards:
@@ -243,14 +245,14 @@ def submit():
                 card['card'] = card['card'].to_json()
         last_turn = {
             'cards': cards,
-            'player1Diff': (player if playerNum == PlayerNumber.ONE else opponent).diff(player_one_copy),
-            'player2Diff': (player if playerNum == PlayerNumber.TWO else opponent).diff(player_two_copy),
+            'player1Diff': player_one.diff(player_one_copy),
+            'player2Diff': player_two.diff(player_two_copy),
         }
         set_last_turn(last_turn, game_id)
         clear_submitted(playerNum.other(), game_id)
         result and set_result(result, game_id)
-        set_player(player, playerNum, game_id)
-        set_player(opponent, opponentNum, game_id)
+        set_player(player_one, PlayerNumber.ONE, game_id)
+        set_player(player_two, PlayerNumber.TWO, game_id)
         socketio.emit('update', {'gameId': game_id})
     else:
         set_submitted(playerNum, game_id)
