@@ -3,7 +3,7 @@ from card import Effect, EffectType
 from effect import Synergy
 
 class Hero():
-    def __init__(self, name, element, description, adjust_card, starting_cards=None, start_of_game=None, every_turn=None):
+    def __init__(self, name, element, description, adjust_card, starting_cards=(lambda : None), start_of_game=None, every_turn=None):
         self.name = name
         self.element = element
         self.description = description

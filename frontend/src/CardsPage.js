@@ -8,10 +8,7 @@ import { Form, useNavigate } from 'react-router-dom';
 import Paper from '@mui/material/Paper';
 import { fetchWrapper } from './GamePage.js';
 import { useRef } from 'react';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
+import HeroSelector from './HeroSelector.js';
 
 function addToDeck(card, deck, setDeck) {
     setDeck([...deck, card]);
@@ -290,37 +287,6 @@ const styles = {
     },
 };
 
-function HeroSelector({ heroes, hero, setHero, element }) {
-    if (!hero || !heroes || !Object.values(heroes).length) {
-        return null;
-    }
-    return (
-        <FormControl>
-            <InputLabel>{element}</InputLabel>
-            <Select
-                label={element}
-                value={hero}
-                onChange={(e) => setHero(e.target.value)}
-                style={{ marginBottom: '10px' }}
-            >
-                {Object.values(heroes).map((h, i) => (
-                    (h.element === element) && <MenuItem key={i} value={h.name}>{h.name}</MenuItem>
-                ))}
-            </Select>
-            <Slot
-                card={{
-                    'text': heroes[hero].description,
-                    'name': heroes[hero].name,
-                }}
-                highlight={false}
-                elements={[element]}
-                lock={false}
-                basic={false}
-                hero={true}
-            />
-        </FormControl>
-    )
-}
 
 export default function CardsPage() {
     const [cards, setCards] = useState([]);

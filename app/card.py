@@ -156,5 +156,5 @@ def starting_cards():
 def starting_wheels(heroes):
     cards = starting_cards()
     return {
-        element: Wheel(heroes[element], heroes[element].starting_cards or cards[element]) for element in Element
+        element: Wheel(heroes[element], heroes[element].starting_cards() or cards[element]) for element in Element
     } 

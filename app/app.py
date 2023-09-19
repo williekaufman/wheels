@@ -120,7 +120,6 @@ def new_game():
     username = request.json.get('username')
     deckname = request.json.get('deckname')
     heroes = get_heroes(username, deckname)
-    print(heroes[Element.WATER].to_json())
     deck = get_deck(username, deckname)
     if deck is None:
         return make_response(jsonify({"error": "Unable to find deck"}), 400)

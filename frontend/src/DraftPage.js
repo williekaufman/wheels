@@ -8,9 +8,10 @@ import Toast from './Toast.js';
 import { fetchWrapper } from './GamePage.js';
 import Box from '@mui/material/Box';
 import { useLocation, useNavigate } from 'react-router-dom';
+import HeroSelector from './HeroSelector.js';
 
-function submit(deck, username, deckname, showErrorToast) {
-    fetchWrapper(`${URL}/decks`, { 'deck': deck, 'username': username, 'deckname': deckname }, 'POST')
+function submit(deck, heroesArg, username, deckname, showErrorToast) {
+    fetchWrapper(`${URL}/decks`, { deck, 'heroes': heroesArg, username, deckname }, 'POST')
         .then((response) => {
             if (response['error']) {
                 showErrorToast(response['error']);
@@ -55,7 +56,7 @@ function Histogram({ data, initial }) {
     let height_per = Math.min(100 / max);
 
 
-    
+
     return (
         <Box display="flex" alignItems="flex-end" height={height_per * max + 30}>
             {Object.entries(histogram).map(([number, frequency]) => (
@@ -78,7 +79,7 @@ function Histogram({ data, initial }) {
 function useQuery() {
     return new URLSearchParams(useLocation().search);
 }
- 
+
 
 export default function DraftPage() {
     let query = useQuery();
@@ -90,8 +91,13 @@ export default function DraftPage() {
     let [toastType, setToastType] = useState('error');
     let [username, setUsername] = useState(localStorage.getItem('spellbooks-username') || '');
     let [deckname, setDeckname] = useState('draft deck');
+    let [heroes, setHeroes] = useState();
+    let [airHero, setAirHero] = useState();
+    let [waterHero, setWaterHero] = useState();
+    let [earthHero, setEarthHero] = useState();
+    let [fireHero, setFireHero] = useState();
     let navigate = useNavigate();
-    
+
     const numChoices = query.get("numChoices") || 5;
     const deckSize = query.get("decksize") || 20;
 
@@ -104,6 +110,23 @@ export default function DraftPage() {
             setError(null);
         }, 5000);
     };
+
+    useEffect(() => {
+        fetchWrapper(`${URL}/heroes`, {}, 'GET')
+            .then((response) => {
+                if (response['error']) {
+                    showErrorToast(response['error']);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                setAirHero(data['defaultHeroes']['air']['name']);
+                setWaterHero(data['defaultHeroes']['water']['name']);
+                setEarthHero(data['defaultHeroes']['earth']['name']);
+                setFireHero(data['defaultHeroes']['fire']['name']);
+                setHeroes(data['heroes']);
+            })
+    }, []);
 
     useEffect(() => {
         fetchWrapper(`${URL}/cards`, {}, 'GET')
@@ -139,7 +162,7 @@ export default function DraftPage() {
 
     function addToDeck(card) {
         setDeck(prevDeck => [...prevDeck, card]);
-   }
+    }
 
     useEffect(() => {
         if (deck.length >= deckSize) {
@@ -189,13 +212,20 @@ export default function DraftPage() {
         return ret
     }
 
+    let heroesArg = {
+        'air': airHero,
+        'water': waterHero,
+        'earth': earthHero,
+        'fire': fireHero,
+    }
+
     return (
         <div>
-            {error && <Toast 
-            style={
-                toastType === 'success' ? { backgroundColor: 'green' } : { backgroundColor: 'red' }
-            }
-            message={error} onClose={() => setError(null)} />}
+            {error && <Toast
+                style={
+                    toastType === 'success' ? { backgroundColor: 'green' } : { backgroundColor: 'red' }
+                }
+                message={error} onClose={() => setError(null)} />}
             <Grid container direction="column" spacing={2} padding="20px">
                 <Grid item>
                     <Grid container direction="row" spacing={2}>
@@ -219,14 +249,22 @@ export default function DraftPage() {
                             />
                         </Grid>
                         <Grid item>
-                            <Button variant="contained" onClick={() => submit(deck, username, deckname, showErrorToast)}>Save Deck</Button>
+                            <Button variant="contained" onClick={() => submit(deck, heroesArg, username, deckname, showErrorToast)}>Save Deck</Button>
                         </Grid>
                         <Grid item>
-                            <Button variant="contained" onClick={() => { submit(deck, username, deckname, showErrorToast); newGame(navigate, username, deckname) }}>New Game With Deck</Button>
+                            <Button variant="contained" onClick={() => { submit(deck, heroesArg, username, deckname, showErrorToast); newGame(navigate, username, deckname) }}>New Game With Deck</Button>
                         </Grid>
                         <Grid item>
                             <Button variant="contained" onClick={() => navigate('/')}>Back to Home</Button>
                         </Grid>
+                    </Grid>
+                </Grid>
+                <Grid item>
+                    <Grid container direction="row" spacing={2}>
+                        {heroes && Object.values(heroes).length !== 0 && <Grid item> <HeroSelector element='air' heroes={heroes} hero={airHero} setHero={setAirHero} /> </Grid>}
+                        {heroes && Object.values(heroes).length !== 0 && <Grid item> <HeroSelector element='earth' heroes={heroes} hero={earthHero} setHero={setEarthHero} /> </Grid>}
+                        {heroes && Object.values(heroes).length !== 0 && <Grid item> <HeroSelector element='fire' heroes={heroes} hero={fireHero} setHero={setFireHero} /> </Grid>}
+                        {heroes && Object.values(heroes).length !== 0 && <Grid item> <HeroSelector element='water' heroes={heroes} hero={waterHero} setHero={setWaterHero} /> </Grid>}
                     </Grid>
                 </Grid>
                 {drafting.length !== 0 && <Grid item>

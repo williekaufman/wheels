@@ -20,7 +20,7 @@ function ShrinkingTextComponent({ text , color , className }) {
     }, [text]);
 
     return (
-        <div style={{color: color, whiteSpace: 'pre-line'}} ref={containerRef} className={className}>
+        <div style={{color: color}} ref={containerRef} className={className}>
             {text}
         </div>
     );
