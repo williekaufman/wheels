@@ -3,13 +3,14 @@ from card import Effect, EffectType
 from effect import Synergy
 
 class Hero():
-    def __init__(self, name, element, description, adjust_card, start_of_game=None, every_turn=None):
+    def __init__(self, name, element, description, adjust_card, starting_cards=None, start_of_game=None, every_turn=None):
         self.name = name
         self.element = element
         self.description = description
         self.start_of_game = start_of_game
         self.every_turn = every_turn
         self.adjust_card = adjust_card
+        self.starting_cards = starting_cards
         
     def to_json(self):
         return {
@@ -61,7 +62,7 @@ air_heroes = [
         name="Aang",
         element=Element.AIR,
         description='''Spells: -1 (Mana) cost +1 (Heal) -1 (Damage)''',
-        adjust_card=make_adjust(-1, [(EffectType.HEAL, 1), (EffectType.DAMAGE, -1)])
+        adjust_card=make_adjust(-1, [(EffectType.HEAL, 1), (EffectType.DAMAGE, -1)]),
     )
 ]
 
