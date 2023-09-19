@@ -1,6 +1,7 @@
 import random
 from effect import Effect, EffectType
 from element import Element
+from hero import heroes, default_heroes
 from enum import Enum
 
 class Card():
@@ -47,8 +48,8 @@ class Card():
             }, ['Not enough mana']
 
 class Wheel():
-    def __init__(self, element, cards, active=None):
-        self.element = element
+    def __init__(self, hero, cards, active=None):
+        self.hero = hero
         assert len(cards) == 10
         self.cards = cards
         if active is not None:
@@ -57,10 +58,10 @@ class Wheel():
             self.spin()
         
     def play(self, card):
-        if self.element not in card.elements:
+        if self.hero.element not in card.elements:
             return False
         if (locations := [i for i in range(len(self.cards)) if self.cards[i] == None]):
-            self.element.adjust_card(card)
+            self.hero.adjust_card(card)
             self.cards[random.choice(locations)] = card
             return True
         return False
@@ -70,15 +71,15 @@ class Wheel():
         
     def to_json(self):
         return {
-            'description': self.element.description(),
-            'element': self.element.value,
+            'description': self.hero.description,
+            'hero': self.hero.name,
             'cards': [card.to_json() if card else None for card in self.cards],
             'active': self.active
         }
         
     def of_json(json):
-        element = Element(json['element'])
-        return Wheel(element, [Card.of_json(card) if card else None for card in json['cards']], json['active'])
+        hero = heroes[json['hero']]
+        return Wheel(hero, [Card.of_json(card) if card else None for card in json['cards']], json['active'])
     
     def active_card(self):
         return self.cards[self.active]
@@ -152,8 +153,8 @@ def starting_cards():
         element: starting_template(configs[element]) for element in Element
     }
 
-def starting_wheels():
+def starting_wheels(heroes):
     cards = starting_cards()
     return {
-        element: Wheel(element, cards[element]) for element in Element
+        element: Wheel(heroes[element], cards[element]) for element in Element
     } 

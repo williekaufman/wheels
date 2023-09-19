@@ -21,6 +21,7 @@ def resolve_wheel(player, opponent, element):
     time = datetime.datetime.now().strftime("%H:%M:%S")
     return card, f'{time}:{player.username}:{element.value}:{log}'
 
+
 def check_game_over(player, opponent):
     if player.get('life') <= 0:
         return Result.TIE if opponent.get('life') <= 0 else Result.PLAYER_TWO
@@ -106,6 +107,12 @@ class Player():
             self.state[key] += value
         else:
             self.permament_state[key] += value
+            
+    def add_nonnegative(self, key, value):
+        if self.state.get(key) is not None:
+            self.state[key] = max(0, self.state[key] + value)
+        else:
+            self.permament_state[key] = max(0, self.permament_state[key] + value)
     
     def diff(self, other):
         return {
@@ -143,15 +150,21 @@ class Player():
     def draw(self, n = 1):
         for i in range(n):
             self.deck and self.hand.append(self.deck.pop())
-      
-    def new_turn(self):
+
+    def start_of_game(self):
         for wheel in self.wheels.values():
-            wheel.spin()
+            wheel.hero.start_of_game and wheel.hero.start_of_game(self)
+      
+    def new_turn(self, first_turn=False):
         self.permament_state['mana'] += self.get('focus')
         self.state = fresh_state()
         self.state['spins'] = 3 + self.get('experience') 
         self.draw()
-   
+        for wheel in self.wheels.values():
+            wheel.spin()
+            if not first_turn:
+                wheel.hero.every_turn and wheel.hero.every_turn(self)
+ 
     def finish_turn(self, opponent):
         log = []
         for wheel in self.wheels.values():

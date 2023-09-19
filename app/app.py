@@ -10,6 +10,7 @@ from functools import wraps
 from engineio.payload import Payload
 from player import Player, PlayerNumber, handle_turn, Result
 from element import Element
+from hero import default_heroes, heroes
 from card import starting_wheels, Card
 from cards import cards, starter_decks
 
@@ -97,6 +98,11 @@ def get_deck(username, deckname):
         return [Card.to_json(card) for card in starter_deck]
     return rget_json(f"decks:{username}:{deckname}")
 
+def get_heroes(username, deckname):
+    if (custom_heroes := rget_json(f"heroes:{username}:{deckname}")):
+        return {Element(k): heroes[v] for k, v in custom_heroes.items()}
+    return default_heroes
+
 def get_all_decks(username):
     return list(starter_decks().keys()) + (rget_json(f"decks:{username}") or [])
 
@@ -113,16 +119,19 @@ def new_game():
     game_id = request.json.get('gameId') or new_game_id()
     username = request.json.get('username')
     deckname = request.json.get('deckname')
+    heroes = get_heroes(username, deckname)
+    print(heroes[Element.WATER].to_json())
     deck = get_deck(username, deckname)
     if deck is None:
         return make_response(jsonify({"error": "Unable to find deck"}), 400)
     deck = [Card.of_json(card) for card in deck] 
-    player1 = Player(deck, starting_wheels(), username)
-    player1.new_turn()
-    set_player(player1, PlayerNumber.ONE, game_id)
+    player = Player(deck, starting_wheels(heroes), username)
+    player.start_of_game() 
+    player.new_turn(True)
+    set_player(player, PlayerNumber.ONE, game_id)
     return jsonify({
         "gameId": game_id,
-        "player": player1.to_json(),
+        "player": player.to_json(),
         })
    
 @app.route("/join_game", methods=["POST"])
@@ -132,14 +141,16 @@ def player_two():
     username = request.json.get('username')
     deckname = request.json.get('deckname')
     deck = get_deck(username, deckname)
+    heroes = get_heroes(username, deckname)
     if deck is None:
         return { "error": "Unable to find deck" }
     if get_player(PlayerNumber.ONE, game_id) is None:
         return { "error": "Invalid game id" }
     if get_player(PlayerNumber.TWO, game_id) is not None:
         return { "error": "Game already full" }
-    player = Player([Card.of_json(card) for card in deck], starting_wheels(), username)
-    player.new_turn()
+    player = Player([Card.of_json(card) for card in deck], starting_wheels(heroes), username)
+    player.start_of_game()
+    player.new_turn(True)
     set_player(player, PlayerNumber.TWO, game_id)
     socketio.emit('update', {'gameId': game_id})
     return jsonify({
@@ -226,7 +237,6 @@ def submit():
         playerNum = PlayerNumber(request.json.get("player"))
     except:
         return make_response(jsonify({"error": "Invalid player"}), 400)
-    opponentNum = playerNum.other()
     player_one = get_player(PlayerNumber.ONE, game_id)
     player_two = get_player(PlayerNumber.TWO, game_id)
     player = player_one if playerNum == PlayerNumber.ONE else player_two
@@ -274,6 +284,7 @@ def push_deck():
     username = request.json.get('username')
     deckname = request.json.get('deckname')
     deck = request.json.get('deck')
+    heroes = request.json.get('heroes')
     if username is None:
         return { "error": "No username" }
     if not deckname:
@@ -283,6 +294,7 @@ def push_deck():
     if deckname in starter_decks():
         return { "error": "Can't overwrite starter deck" }
     rset_json(f"decks:{username}:{deckname}", deck)
+    rset_json(f"heroes:{username}:{deckname}", heroes)
     add_deck(username, deckname)
     return jsonify({"success": True})
 
@@ -293,7 +305,8 @@ def see_deck(deckname):
     if username is None:
         return { "error": "No username" }
     return jsonify({
-        "deck": get_deck(username, deckname)
+        "deck": get_deck(username, deckname),
+        "heroes": {k.value: v.to_json() for k, v in get_heroes(username, deckname).items()}
     })
 
 @app.route('/decks/delete/<deckname>', methods=['POST'])
@@ -306,6 +319,7 @@ def delete_deck(deckname):
         return { "error": "Can't delete starter deck" }
     remove_deck(username, deckname)
     redis.delete(f"decks:{username}:{deckname}")
+    redis.delete(f"heroes:{username}:{deckname}")
     return jsonify({"success": True})
 
 @app.route('/decks', methods=['GET'])
@@ -318,6 +332,30 @@ def get_decknames():
         "decks": get_all_decks(username)
     })
     
+    
+@app.route('/hero', methods=['GET'])
+@api_endpoint
+def get_hero():
+    hero = request.args.get('hero')
+    if hero is None:
+        return { "error": "No hero" }
+    return jsonify({
+        "hero": heroes[hero].to_json()
+    })
+
+@app.route('/heroes', methods=['GET'])
+@api_endpoint
+def get_heroes_list():
+    element = request.args.get('element')
+    if element is None:
+        return jsonify({
+            "defaultHeroes": {k.value: v.to_json() for k, v in default_heroes.items()}, 
+            "heroes": {k: v.to_json() for k, v in heroes.items()}
+        })
+    return jsonify({
+        "defaultHeroes": {k.value: v.to_json() for k, v in default_heroes.items() if k == Element(element)},
+        "heroes": {k: v.to_json() for k, v in heroes.items() if v.element == Element(element)}
+    })
 
 @socketio.on('join')
 def on_join(data):

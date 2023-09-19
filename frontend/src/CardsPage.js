@@ -4,10 +4,14 @@ import Slot from './Slot.js';
 import { URL } from './settings';
 import Button from '@mui/material/Button';
 import Toast from './Toast.js';
-import { useNavigate } from 'react-router-dom';
+import { Form, useNavigate } from 'react-router-dom';
 import Paper from '@mui/material/Paper';
 import { fetchWrapper } from './GamePage.js';
 import { useRef } from 'react';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
 
 function addToDeck(card, deck, setDeck) {
     setDeck([...deck, card]);
@@ -17,9 +21,9 @@ function removeFromDeck(index, deck, setDeck) {
     setDeck(deck.filter((card, i) => i !== index));
 }
 
-function submit(deck, username, deckname, setDecks, showErrorToast) {
-    fetchWrapper(`${URL}/decks`, { 'deck': deck, 'username': username, 'deckname': deckname }, 'POST')
-        .then((res) => res.json())    
+function submit(deck, heroesArg, username, deckname, setDecks, showErrorToast) {
+    fetchWrapper(`${URL}/decks`, { 'deck': deck, 'username': username, 'deckname': deckname , 'heroes': heroesArg }, 'POST')
+        .then((res) => res.json())
         .then((response) => {
             if (response['error']) {
                 showErrorToast(response['error']);
@@ -99,7 +103,7 @@ function draftButtonDisabled(numChoices, decksize) {
     return isNaN(numChoices) || isNaN(decksize) || numChoices < 1 || decksize < 1;
 }
 
-function JoinModal({ navigate, username, deckname, deck, setDecks, setJoinModalOpen, showErrorToast }) {
+function JoinModal({ navigate, username, deckname, deck, heroesArg, setDecks, setJoinModalOpen, showErrorToast }) {
     let [gameId, setGameId] = useState('');
 
     useEffect(() => {
@@ -107,7 +111,7 @@ function JoinModal({ navigate, username, deckname, deck, setDecks, setJoinModalO
             if (event.key === 'Escape') {
                 setJoinModalOpen(false);
             } if (event.key === 'Enter') {
-                submit(deck, username, deckname, setDecks, (e) => null);
+                submit(deck, heroesArg, username, deckname, setDecks, (e) => null);
                 joinGame(navigate, gameId, username, deckname, showErrorToast);
             }
         };
@@ -129,6 +133,14 @@ function JoinModal({ navigate, username, deckname, deck, setDecks, setJoinModalO
 
     const modalRef = useRef(null);
 
+    const inputRef = useRef(null);
+
+    useEffect(() => {
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, []);
+
     return (
         <div style={styles.overlay}>
             <div ref={modalRef} style={styles.modal}>
@@ -136,6 +148,7 @@ function JoinModal({ navigate, username, deckname, deck, setDecks, setJoinModalO
                     <label>
                         Game Id:
                         <input
+                            ref={inputRef}
                             style={styles.input}
                             value={gameId}
                             onChange={(e) => setGameId(e.target.value)}
@@ -154,7 +167,7 @@ function JoinModal({ navigate, username, deckname, deck, setDecks, setJoinModalO
                         </Grid>
                         <Grid item>
                             <Button
-                                onClick={() => { submit(deck, username, deckname, setDecks, (e) => null ); joinGame(navigate, gameId, username, deckname, showErrorToast)}}
+                                onClick={() => { submit(deck, heroesArg, username, deckname, setDecks, (e) => null); joinGame(navigate, gameId, username, deckname, showErrorToast) }}
                                 variant="contained"
                             >
                                 Submit
@@ -255,6 +268,7 @@ const styles = {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
+        zIndex: 1000,
     },
     modal: {
         padding: '20px',
@@ -276,6 +290,37 @@ const styles = {
     },
 };
 
+function HeroSelector({ heroes, hero, setHero, element }) {
+    if (!hero || !heroes || !Object.values(heroes).length) {
+        return null;
+    }
+    return (
+        <FormControl>
+            <InputLabel>{element}</InputLabel>
+            <Select
+                label={element}
+                value={hero}
+                onChange={(e) => setHero(e.target.value)}
+                style={{ marginBottom: '10px' }}
+            >
+                {Object.values(heroes).map((h, i) => (
+                    (h.element === element) && <MenuItem key={i} value={h.name}>{h.name}</MenuItem>
+                ))}
+            </Select>
+            <Slot
+                card={{
+                    'text': heroes[hero].description,
+                    'name': heroes[hero].name,
+                }}
+                highlight={false}
+                elements={[element]}
+                lock={false}
+                basic={false}
+                hero={true}
+            />
+        </FormControl>
+    )
+}
 
 export default function CardsPage() {
     const [cards, setCards] = useState([]);
@@ -287,11 +332,16 @@ export default function CardsPage() {
     const [username, setUsername] = useState(localStorage.getItem('spellbooks-username') || '');
     const [deckname, setDeckname] = useState('');
     const [cardnameFilter, setCardnameFilter] = useState('');
-    const [elementFilter, setElementFilter] = useState();
+    const [elementFilter, setElementFilter] = useState('');
     const [numChoices, setNumChoices] = useState(5);
     const [decksize, setDecksize] = useState(20);
     const [draftingModalOpen, setDraftingModalOpen] = useState(false);
     const [joinModalOpen, setJoinModalOpen] = useState(false);
+    const [heroes, setHeroes] = useState();
+    const [fireHero, setFireHero] = useState();
+    const [waterHero, setWaterHero] = useState();
+    const [earthHero, setEarthHero] = useState();
+    const [airHero, setAirHero] = useState();
     const navigate = useNavigate();
 
     const setDeckFromName = (deckname) => {
@@ -304,6 +354,10 @@ export default function CardsPage() {
             })
             .then((data) => {
                 setDeck(data['deck']);
+                setAirHero(data['heroes']['air']['name']);
+                setWaterHero(data['heroes']['water']['name']);
+                setEarthHero(data['heroes']['earth']['name']);
+                setFireHero(data['heroes']['fire']['name']);
                 setDeckname(deckname);
             })
             .catch((e) => {
@@ -361,6 +415,23 @@ export default function CardsPage() {
             });
     }, []);
 
+    useEffect(() => {
+        fetchWrapper(`${URL}/heroes`, {}, 'GET')
+            .then((response) => {
+                if (response['error']) {
+                    showErrorToast(response['error']);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                setAirHero(data['defaultHeroes']['air']['name']);
+                setWaterHero(data['defaultHeroes']['water']['name']);
+                setEarthHero(data['defaultHeroes']['earth']['name']);
+                setFireHero(data['defaultHeroes']['fire']['name']);
+                setHeroes(data['heroes']);
+            })
+    }, []);
+
     const elements = ['fire', 'water', 'earth', 'air'];
 
     function filterByNames(card) {
@@ -390,6 +461,13 @@ export default function CardsPage() {
 
     let modalOpen = draftingModalOpen || joinModalOpen;
 
+    let heroesArg = {
+        'air': airHero,
+        'water': waterHero,
+        'earth': earthHero,
+        'fire': fireHero,
+    }
+
     function bgColor(x) {
         if (modalOpen) {
             return
@@ -397,7 +475,7 @@ export default function CardsPage() {
         if (x === deckname) {
             return 'red';
         } if (starterDecks && starterDecks.includes(x)) {
-            return 'orange';
+            return 'green';
         }
     }
 
@@ -420,37 +498,42 @@ export default function CardsPage() {
                 navigate={navigate}
                 setJoinModalOpen={setJoinModalOpen}
                 deck={deck}
+                heroesArg={heroesArg}
                 setDecks={setDecks}
                 username={username}
                 deckname={deckname}
                 showErrorToast={showErrorToast}
-                />
+            />
             }
-            <Grid container direction="column" spacing={2} padding="20px">
+            <Grid container direction="column" spacing={2} padding="10px">
                 <Grid item>
-                    <label> Username: </label>
+                    <Paper style={{ padding: '10px', backgroundColor: 'lightgray' }}>
                     <input
                         type="text"
                         value={username}
+                        placeholder="username"
                         onChange={(e) => {
                             localStorage.setItem('spellbooks-username', e.target.value);
                             setUsername(e.target.value)
                         }}
                     />
-                    <label style={{ marginLeft: '10px' }}> Deck name: </label>
                     <input
                         type="text"
                         value={deckname}
+                        placeholder="Deck name"
                         onChange={(e) => setDeckname(e.target.value)}
+                        style={{ marginLeft: '10px' }}
                     />
-                    <label style={{ marginLeft: '10px' }}> Card name filter: </label>
                     <input
                         type="text"
                         value={cardnameFilter}
+                        placeholder="Card name filter"
                         onChange={(e) => setCardnameFilter(e.target.value)}
+                        style={{ marginLeft: '10px' }}
                     />
-                    <label style={{ marginLeft: '10px' }}> Element filter: </label>
+                    <label style={{ marginLeft: '10px' }}>Element Filter:</label>
                     <select
+                        style={{ marginLeft: '10px' }}
                         value={elementFilter}
                         onChange={(e) => setElementFilter(e.target.value)}
                     >
@@ -469,29 +552,40 @@ export default function CardsPage() {
                             <Button disabled={modalOpen || !deck.length} variant="contained" onClick={() => setDeck([])}>Clear Deck</Button>
                         </Grid>
                         <Grid item>
-                            <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => submit(deck, username, deckname, setDecks, showErrorToast)}>Submit</Button>
+                            <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => submit(deck, heroesArg, username, deckname, setDecks, showErrorToast)}>Submit</Button>
                         </Grid> <Grid item>
                             <Button disabled={modalOpen || !deckname || decks.every(deck => deck !== deckname)} variant="contained" onClick={() => deleteDeck(deckname, setDeckname, username, setDeck, setDecks, showErrorToast)}>Delete</Button>
                         </Grid> <Grid item>
-                            <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => { submit(deck, username, deckname, setDecks, showErrorToast); newGame(navigate, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
+                            <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => { submit(deck, heroesArg, username, deckname, setDecks, showErrorToast); newGame(navigate, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
                         </Grid> <Grid item>
                             <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => { setJoinModalOpen(true) }}>{deckname ? `Join Game With ${deckname}` : 'Name deck to use'}</Button>
                         </Grid>
                     </Grid>
+                    </Paper>
                 </Grid>
                 {decks.length !== 0 && <Grid item>
-                    <Paper style={{ padding: '10px', backgroundColor: 'lightblue' }}>
+                    <Paper style={{ padding: '10px', backgroundColor: 'lightgray' }}>
                         <Grid container spacing={2}>
                             {decks.map((deck, i) => (
                                 <Grid item key={i}>
-                                    <Button disabled={modalOpen} variant="contained" style={bgColor(deck) ? { backgroundColor: bgColor(deck)} : {}} onClick={() => setDeckFromName(deck)}>{deck}</Button>
+                                    <Button disabled={modalOpen} variant="contained" style={bgColor(deck) ? { backgroundColor: bgColor(deck) } : {}} onClick={() => setDeckFromName(deck)}>{deck}</Button>
                                 </Grid>
                             ))}
                         </Grid>
                     </Paper>
                 </Grid>}
+                <Grid item>
+                    <Paper style={{ padding: '10px', backgroundColor: 'lightgray' }}>
+                        <Grid container direction="row" spacing={2}>
+                            {heroes && Object.values(heroes).length !== 0 && <Grid item> <HeroSelector element='air' heroes={heroes} hero={airHero} setHero={setAirHero} /> </Grid>}
+                            {heroes && Object.values(heroes).length !== 0 && <Grid item> <HeroSelector element='earth' heroes={heroes} hero={earthHero} setHero={setEarthHero} /> </Grid>}
+                            {heroes && Object.values(heroes).length !== 0 && <Grid item> <HeroSelector element='fire' heroes={heroes} hero={fireHero} setHero={setFireHero} /> </Grid>}
+                            {heroes && Object.values(heroes).length !== 0 && <Grid item> <HeroSelector element='water' heroes={heroes} hero={waterHero} setHero={setWaterHero} /> </Grid>}
+                        </Grid>
+                    </Paper>
+                </Grid>
                 {deck.length !== 0 && <Grid item>
-                    <Paper style={{ padding: '10px', backgroundColor: 'lightyellow' }}>
+                    <Paper style={{ padding: '10px', backgroundColor: 'lightgray' }}>
                         <Grid container direction="row" spacing={2}>
                             {deck.map((card, i) => (
                                 <Grid item key={i}>
@@ -508,9 +602,8 @@ export default function CardsPage() {
                         </Grid>
                     </Paper>
                 </Grid>}
-
                 <Grid item>
-                    <Paper style={{ padding: '10px', backgroundColor: 'lightgreen' }}>
+                    <Paper style={{ padding: '10px', backgroundColor: 'lightgray' }}>
                         <Grid container direction="row" spacing={2}>
                             {cards.map((card, i) => (
                                 filterByNames(card) && filterByElements(card) &&

@@ -1,13 +1,25 @@
 from enum import Enum
 
+class Synergy(Enum):
+    POSITIVE = 'positive'
+    NEGATIVE = 'negative' 
+    NEUTRAL = 'neutral'
+    
+    def to_prefix(self):
+        return {
+            Synergy.POSITIVE: "SYNERGY:",
+            Synergy.NEGATIVE: "ANTI:",
+            Synergy.NEUTRAL: ""
+        }[self]
+        
 class Effect():
-    def __init__(self, type, value, synergy=False):
+    def __init__(self, type, value, element=None, synergy=Synergy.NEUTRAL):
         self.type = type
         self.value = value
         self.synergy = synergy      
        
     def text(self):
-        synergy_prefix = "SYNERGY:" if self.synergy else ""
+        synergy_prefix = self.synergy.to_prefix()
         if self.type == EffectType.HEAL:
             return f"{synergy_prefix}{self.value} (Heal)"
         if self.type == EffectType.DAMAGE:
@@ -31,14 +43,14 @@ class Effect():
         return {
             "type": self.type.value,
             "value": self.value,
-            "synergy": self.synergy
+            "synergy": self.synergy.value
         }
         
     def of_json(json):
         return Effect(
             EffectType(json["type"]),
             json["value"],
-            json["synergy"]
+            Synergy(json["synergy"])
         )
         
     def resolve(self, player, opponent):

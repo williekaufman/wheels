@@ -54,8 +54,8 @@ export function Focus() {
     )
 }
 
-function formatSynergyNumber(number) {
-    return <span style={{ color: 'green' }}>{number}</span>;
+function formatSynergyNumber(number, isPositive) {
+    return <span style={{color: isPositive ? 'green' : 'purple'}}>{number}</span>;
 }
 
 export function replaceTextWithImages (text) {
@@ -88,7 +88,11 @@ export function replaceTextWithImages (text) {
         } else {
             const synergyMatch = part.match(/SYNERGY:(\d+)/);
             if (synergyMatch) {
-                return formatSynergyNumber(synergyMatch[1]);
+                return formatSynergyNumber(synergyMatch[1], true);
+            }
+            const antiSynergyMatch = part.match(/ANTI:(\d+)/);
+            if (antiSynergyMatch) {
+                return formatSynergyNumber(antiSynergyMatch[1], false);
             }
             return part;
         }

@@ -30,6 +30,7 @@ function GameInfo({ playerState, opponentState }) {
             <p style={paragraphStyle}>Mana: {playerState['permanentState']['mana']}</p>
             <p style={paragraphStyle}>Focus: {playerState['permanentState']['focus']}</p>
             <p style={paragraphStyle}>Health: {playerState['permanentState']['life']}</p>
+            <p style={paragraphStyle}>Block: {playerState['state']['block']}</p>
             <p style={paragraphStyle}>Experience: {playerState['permanentState']['experience']}</p>
           </div>
           {opponentState ? <div style={{width: '33%', textAlign: 'center'}}>
@@ -38,6 +39,7 @@ function GameInfo({ playerState, opponentState }) {
             <p style={paragraphStyle}>Mana: {opponentState['permanentState']['mana']}</p>
             <p style={paragraphStyle}>Focus: {opponentState['permanentState']['focus']}</p>
             <p style={paragraphStyle}>Health: {opponentState['permanentState']['life']}</p>
+            <p style={paragraphStyle}>Block: {opponentState['state']['block']}</p>
             <p style={paragraphStyle}>Experience: {opponentState['permanentState']['experience']}</p>
           </div> : <div style={{width: '33%', textAlign: 'center'}}> Waiting for opponent... </div>}
       </Stack>

@@ -4,9 +4,13 @@
   border-radius: 5px;
   padding: 10px;
   font-weight: bold;
-  width: 200px;
+  width: 250px;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   background-color: #fff;
+}
+
+.slot.hero {
+  height: 120px;
 }
 
 .slot.basic {
@@ -135,11 +139,12 @@
   clear: both;
   font-size: 1rem;
   margin-top: 5px;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .icon {
   width: 20px;
   height: 20px;
-  margin-bottom: -2px;
-  margin-right: 3px;
+  margin-bottom: -3px;
 }

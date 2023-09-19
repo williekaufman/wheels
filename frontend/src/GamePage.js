@@ -202,6 +202,28 @@ function Wheel({
     playerNum,
     result
 }) {
+    let [heroCard, setHeroCard] = useState(null);
+
+    const wheel = (opponentView ? opponentState : playerState)['wheels'][element];
+
+    useEffect(() => {
+        if (!wheel) {
+            return;
+        }
+        fetchWrapper(`${URL}/hero`, { 'hero': wheel['hero'] }, 'GET')
+            .then((res) => res.json())
+            .then((data) => {
+                if (data['error']) {
+                    showErrorToast(data['error']);
+                    return;
+                }
+                setHeroCard(data['hero']);
+            }
+        );
+    }, [wheel]);
+
+
+    
     if (!playerState) {
         return (
             <div> </div>
@@ -230,12 +252,21 @@ function Wheel({
         )
     }
 
-    const wheel = (opponentView ? opponentState : playerState)['wheels'][element];
-
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Typography variant="h6">{replaceTextWithImages(wheel['description'])}</Typography>
-            <Button style={{ width: '100%' }} onClick={() => setLock(!lock)}>{lock ? 'unlock' : 'lock'} {element}</Button>
+            {heroCard && <Slot
+                card={{
+                    'name': heroCard['name'],
+                    'text': heroCard['description'],
+                }}
+                lock={lock}
+                basic={false}
+                elements={[heroCard['element']]}
+                highlight={false}
+                onClick={() => onClick()}
+                hero={true}
+            />}
+            <Button style={{ width: '100%' }} onClick={() => setLock(!lock)}>{lock ? 'unlock' : 'lock'} {wheel['hero']}</Button>
             {wheel['cards'].map((card, index) => (
                 <Slot card={card} key={index} lock={lock} basic={index < 5} elements={[element]} highlight={!opponentView && index === wheel['active']} onClick={() => onClick()} />
             ))}
@@ -265,7 +296,7 @@ function Hand({ playerState, activeCardIndex, setActiveCardIndex }) {
     }
 
     return (
-        <Grid container spacing={2} style={{ width: '864px' }}>
+        <Grid container spacing={2} style={{ width: '1064px' }}>
             {hand.map((card, index) => (
                 <Grid item key={index}>
                     <Slot
