@@ -3,7 +3,7 @@ import './Slot.css';
 import { Mana, replaceTextWithImages } from './Icons';
 import { useEffect, useRef } from 'react';
 
-function ShrinkingTextComponent({ text , color , className }) {
+function ShrinkingTextComponent({ text, color, className }) {
     const containerRef = useRef(null);
 
     useEffect(() => {
@@ -20,7 +20,7 @@ function ShrinkingTextComponent({ text , color , className }) {
     }, [text]);
 
     return (
-        <div style={{color: color}} ref={containerRef} className={className}>
+        <div style={{ color: color }} ref={containerRef} className={className}>
             {text}
         </div>
     );
@@ -38,13 +38,13 @@ function ManaTemplate({ mana }) {
     )
 }
 
-function Slot({ card , highlight , elements, lock , player, failed, basic, onClick , title , hero }) {
+function Slot({ card, highlight, elements, lock, player, failed, basic, onClick, title, hero }) {
     let classNames = 'slot';
     classNames = lock ? classNames + ' lock' : classNames;
     classNames = highlight ? classNames + ' highlight' : classNames;
-    classNames = basic ? classNames + ' basic' : classNames; 
+    classNames = basic ? classNames + ' basic' : classNames;
     classNames = hero ? classNames + ' hero' : classNames;
-    
+
     if (player) {
         classNames = classNames + ' ' + player;
     }
@@ -58,16 +58,16 @@ function Slot({ card , highlight , elements, lock , player, failed, basic, onCli
         )
     }
 
-    elements.forEach(element => {   
+    elements.forEach(element => {
         classNames += ' ' + element;
     });
-    
+
     return (
         <div title={title} className={classNames} onClick={onClick}>
-            <ManaTemplate mana={card['mana_cost']}/>
-            <ShrinkingTextComponent className="card-name" color={failed ? 'red' : 'black'} text={card['name']} /> 
-            <ShrinkingTextComponent className="card-text" color='black' text={replaceTextWithImages(card['text'])} />
-            </div>
+            <ManaTemplate mana={card['mana_cost']} />
+            <ShrinkingTextComponent className="card-name" color={failed ? 'red' : 'black'} text={card['name']} />
+            <div style={{ whiteSpace: 'pre-line' }} className="card-text"> {replaceTextWithImages(card['text'])} </div>
+        </div>
     )
 }
 

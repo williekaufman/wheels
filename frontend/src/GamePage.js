@@ -219,11 +219,11 @@ function Wheel({
                 }
                 setHeroCard(data['hero']);
             }
-        );
+            );
     }, [wheel]);
 
 
-    
+
     if (!playerState) {
         return (
             <div> </div>
@@ -439,15 +439,10 @@ const copyToClipboard = (str) => {
     document.body.removeChild(el);
 };
 
-function RightAlignedButtons({ navigate, playerNum, showLog, setShowLog, showLastTurn, setShowLastTurn, setHowToPlayOpen , gameId }) {
+function RightAlignedButtons({ navigate, playerNum, showLog, setShowLog, showLastTurn, setShowLastTurn, setHowToPlayOpen, gameId }) {
     return (
-        <Grid container direction="row" spacing={2} style={{marginRight: '20px' }}>
+        <Grid container direction="row" spacing={2} style={{ marginRight: '20px' }}>
             <Grid item> <Button variant="contained" onClick={() => setHowToPlayOpen(true)}>Documentation</Button> </Grid>
-            {playerNum === 1 && <Grid item>
-                <Button variant="contained" color="primary" onClick={() => copyToClipboard(gameId)}>
-                    Copy GameId
-                </Button>
-            </Grid>}
             <Grid item>
                 <Button variant="contained" onClick={() => setShowLog(!showLog)}>
                     {showLog ? 'Hide' : 'Show'} Log
@@ -458,8 +453,16 @@ function RightAlignedButtons({ navigate, playerNum, showLog, setShowLog, showLas
                     {showLastTurn ? 'Hide' : 'Show'} Last Turn
                 </Button>
             </Grid>
- 
+            {playerNum === 1 && <Grid item>
+                <Button variant="contained" color="primary" onClick={() => copyToClipboard(gameId)}>
+                    Copy GameId
+                </Button>
+            </Grid>}
+
             <Grid item>
+                <Button variant="contained" color="primary" onClick={() => navigate('/')}>
+                    Home
+                </Button>
             </Grid>
         </Grid>
     );
@@ -483,7 +486,7 @@ export default function GamePage() {
     const [playerState, setPlayerState] = useState();
     const [opponentState, setOpponentState] = useState();
     const [result, setResult] = useState();
-    
+
     const [lastTurn, setLastTurn] = useState();
     const [currentAnimation, setCurrentAnimation] = useState();
 
@@ -609,9 +612,9 @@ export default function GamePage() {
             </Grid >
             <GameInfo playerState={playerState} opponentState={opponentState} />
             {showLastTurn && <Grid item>
-                <Turn turn={lastTurn} playerNum={playerNum}/>
+                <Turn turn={lastTurn} playerNum={playerNum} />
             </Grid>}
-            <Grid container direction="column" className="cards-container" spacing={2} style={{marginTop: '10px'}}>
+            <Grid container direction="column" className="cards-container" spacing={2} style={{ marginTop: '10px' }}>
                 <Grid item>
                     <Wheels
                         opponentView={opponentView}

@@ -152,6 +152,8 @@ class Player():
             self.deck and self.hand.append(self.deck.pop())
 
     def start_of_game(self):
+        self.draw()
+        self.draw()
         for wheel in self.wheels.values():
             wheel.hero.start_of_game and wheel.hero.start_of_game(self)
       
