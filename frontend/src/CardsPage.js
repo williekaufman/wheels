@@ -61,7 +61,7 @@ function getDecks(username, setDecks, showErrorToast) {
 
 
 function newGame(navigate, username, deckname) {
-    return fetchWrapper(`${URL}/new_game`, { 'username': username, 'deckname': deckname }, 'POST')
+    return fetchWrapper(`${URL}/join_game`, { 'username': username, 'deckname': deckname }, 'POST')
         .then((res) => res.json())
         .then((data) => {
             if (data['error']) {

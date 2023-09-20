@@ -54,14 +54,14 @@ def get_result(game_id):
 def set_result(result, game_id):
     rset('result', result.value, game_id=game_id)
 
-def get_submitted(playerNum, game_id):
-    return rget(f"{playerNum.value}:submitted", game_id=game_id)
+def get_submitted(player_num, game_id):
+    return rget(f"{player_num.value}:submitted", game_id=game_id)
 
 def set_submitted(player, game_id):
     rset(f"{player.value}:submitted", 'true', game_id=game_id)
 
-def clear_submitted(playerNum, game_id):
-    rset(f"{playerNum.value}:submitted", '', game_id=game_id)
+def clear_submitted(player_num, game_id):
+    rset(f"{player_num.value}:submitted", '', game_id=game_id)
 
 def get_player(number, game_id):
     if (player := rget_json(number.value, game_id=game_id)):
@@ -112,50 +112,57 @@ def get_cards():
     return jsonify({
         "cards": [card.to_json() for card in cards()]
     })
-
-@app.route("/new_game", methods=["POST"])
+    
+@app.route("/rematch", methods=["GET"])
 @api_endpoint
-def new_game():
-    game_id = request.json.get('gameId') or new_game_id()
-    username = request.json.get('username')
-    deckname = request.json.get('deckname')
-    heroes = get_heroes(username, deckname)
-    deck = get_deck(username, deckname)
-    if deck is None:
-        return make_response(jsonify({"error": "Unable to find deck"}), 400)
-    deck = [Card.of_json(card) for card in deck] 
-    player = Player(deck, starting_wheels(heroes), username)
-    player.start_of_game() 
-    player.new_turn(True)
-    set_player(player, PlayerNumber.ONE, game_id)
-    return jsonify({
-        "gameId": game_id,
-        "player": player.to_json(),
-        })
-   
+def rematch_params():
+    game_id = request.args.get('gameId')
+    player_num = request.args.get('player')
+    try:
+        player_num = PlayerNumber(int(player_num))
+    except:
+        return make_response(jsonify({"error": "Invalid player"}), 400)
+    if player_num == PlayerNumber.ONE:
+        rematch_params = rget_json(f'rematch:{PlayerNumber.ONE.value}', game_id=game_id)
+    else:
+        print('p2')
+        rematch_params = rget_json(f'rematch:{PlayerNumber.TWO.value}', game_id=game_id)
+    rematch_params['gameId'] = rget('rematch:game_id', game_id=game_id)
+    return jsonify(rematch_params)
+
 @app.route("/join_game", methods=["POST"])
 @api_endpoint
 def player_two():
-    game_id = request.json.get('gameId')
+    game_id = request.json.get('gameId') or new_game_id()
     username = request.json.get('username')
     deckname = request.json.get('deckname')
     deck = get_deck(username, deckname)
     heroes = get_heroes(username, deckname)
     if deck is None:
         return { "error": "Unable to find deck" }
-    if get_player(PlayerNumber.ONE, game_id) is None:
-        return { "error": "Invalid game id" }
-    if get_player(PlayerNumber.TWO, game_id) is not None:
-        return { "error": "Game already full" }
+    if get_player(PlayerNumber.ONE, game_id):
+        if get_player(PlayerNumber.TWO, game_id):
+            return { "error": "Game already full" }
+        player_num = PlayerNumber.TWO
+    else:
+        player_num = PlayerNumber.ONE
     deck = [Card.of_json(card) for card in deck]
     player = Player(deck, starting_wheels(heroes), username)
     player.start_of_game()
     player.new_turn(True)
-    set_player(player, PlayerNumber.TWO, game_id)
+    set_player(player, player_num, game_id)
     socketio.emit('update', {'gameId': game_id})
+    rematch_params = {
+        'username': username,
+        'deckname': deckname,
+    }
+    if rget('rematch:game_id', game_id=game_id) is None:
+        rset('rematch:game_id', new_game_id(), game_id=game_id)
+    rset_json(f'rematch:{player_num.value}', rematch_params, game_id=game_id)
     return jsonify({
         "gameId": game_id,
         "player": player.to_json(),
+        "playerNum": player_num.value, 
         })
     
 @app.route("/state", methods=['GET'])
@@ -163,11 +170,11 @@ def player_two():
 def state():
     game_id = request.args.get("gameId")
     try:
-        playerNum = PlayerNumber(int(request.args.get("player")))
+        player_num = PlayerNumber(int(request.args.get("player")))
     except:
         return make_response(jsonify({"error": "Invalid player"}), 400)
-    player = get_player(playerNum, game_id)
-    opponent = get_player(playerNum.other(), game_id)
+    player = get_player(player_num, game_id)
+    opponent = get_player(player_num.other(), game_id)
     if player is None:
         return make_response(jsonify({"error": "Invalid player"}), 400)
     result = get_result(game_id)
@@ -175,7 +182,7 @@ def state():
     ret = {
         "player": player.to_json(),
         "opponent": opponent and opponent.to_json(),
-        "submitted": get_submitted(playerNum, game_id),
+        "submitted": get_submitted(player_num, game_id),
         "log": get_log(game_id),
         "lastTurn": last_turn, 
     }
@@ -188,24 +195,24 @@ def state():
 def spin():
     game_id = request.json.get("gameId")
     try:
-        playerNum = PlayerNumber(request.json.get("player"))
+        player_num = PlayerNumber(request.json.get("player"))
     except:
         return make_response(jsonify({"error": "Invalid player"}), 400)
     locks = request.json.get("locks")
-    player = get_player(playerNum, game_id)
+    player = get_player(player_num, game_id)
     if player is None:
         return make_response(jsonify({"error": "Invalid player"}), 400)
     if locks is None:
         return make_response(jsonify({"error": "No locks"}), 400)
     if player.get('spins') <= 0:
         return make_response(jsonify({"error": "No spins left"}), 400)
-    if get_submitted(playerNum, game_id):
+    if get_submitted(player_num, game_id):
         return make_response(jsonify({"error": "Already submitted"}), 400) 
     player.add('spins', -1)
     for element, wheel in player.wheels.items():
         if element.value not in locks:
             wheel.spin()
-    set_player(player, playerNum, game_id)
+    set_player(player, player_num, game_id)
     return jsonify({"player": player.to_json()})
 
 @app.route("/play", methods=["POST"])
@@ -213,12 +220,12 @@ def spin():
 def play():
     game_id = request.json.get("gameId")
     try:
-        playerNum = PlayerNumber(request.json.get("player"))
+        player_num = PlayerNumber(request.json.get("player"))
     except:
         return make_response(jsonify({"error": "Invalid player"}), 400)
     card_index = request.json.get("cardIndex")
     wheel = request.json.get("wheel")
-    player = get_player(playerNum, game_id)
+    player = get_player(player_num, game_id)
     if player is None:
         return make_response(jsonify({"error": "Invalid player"}), 400)
     if card_index is None:
@@ -226,7 +233,7 @@ def play():
     if wheel is None:
         return make_response(jsonify({"error": "No wheel"}), 400)
     player.play(Element(wheel), card_index)
-    set_player(player, playerNum, game_id)
+    set_player(player, player_num, game_id)
     return jsonify({"player": player.to_json()})
 
 @app.route("/submit", methods=['POST'])
@@ -234,16 +241,16 @@ def play():
 def submit():
     game_id = request.json.get("gameId")
     try:
-        playerNum = PlayerNumber(request.json.get("player"))
+        player_num = PlayerNumber(request.json.get("player"))
     except:
         return make_response(jsonify({"error": "Invalid player"}), 400)
     player_one = get_player(PlayerNumber.ONE, game_id)
     player_two = get_player(PlayerNumber.TWO, game_id)
-    player = player_one if playerNum == PlayerNumber.ONE else player_two
-    opponent = player_one if playerNum == PlayerNumber.TWO else player_two
+    player = player_one if player_num == PlayerNumber.ONE else player_two
+    opponent = player_one if player_num == PlayerNumber.TWO else player_two
     if player is None:
         return make_response(jsonify({"error": "Invalid player"}), 400)
-    if get_submitted(playerNum.other(), game_id):
+    if get_submitted(player_num.other(), game_id):
         log = get_log(game_id)
         player_one_copy = get_player(PlayerNumber.ONE, game_id)
         player_two_copy = get_player(PlayerNumber.TWO, game_id)
@@ -259,13 +266,13 @@ def submit():
             'player2Diff': player_two.diff(player_two_copy),
         }
         set_last_turn(last_turn, game_id)
-        clear_submitted(playerNum.other(), game_id)
+        clear_submitted(player_num.other(), game_id)
         result and set_result(result, game_id)
         set_player(player_one, PlayerNumber.ONE, game_id)
         set_player(player_two, PlayerNumber.TWO, game_id)
         socketio.emit('update', {'gameId': game_id})
     else:
-        set_submitted(playerNum, game_id)
+        set_submitted(player_num, game_id)
     return jsonify({
         "player": player.to_json(),
         "opponent": opponent and opponent.to_json(),

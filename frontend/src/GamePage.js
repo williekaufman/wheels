@@ -439,6 +439,44 @@ const copyToClipboard = (str) => {
     document.body.removeChild(el);
 };
 
+function joinGame(navigate, gameId, username, deckname, showErrorToast) {
+    if (!gameId) {
+        return;
+    }
+    return fetchWrapper(`${URL}/join_game`, { 'username': username, 'deckname': deckname, 'gameId': gameId }, 'POST')
+        .then((res) => res.json())
+        .then((data) => {
+            if (data['error']) {
+                showErrorToast(data['error']);
+                return;
+            }
+            navigate(`/game/${data['gameId']}?playerNum=${data['playerNum']}`);
+            window.location.reload();
+        }
+        );
+}
+
+function RematchButton({ navigate, gameId, playerNum, showErrorToast }) {
+    function rematch() {
+        fetchWrapper(`${URL}/rematch`, { 'gameId': gameId, 'player': playerNum }, 'GET')
+            .then((res) => res.json())
+            .then((data) => {
+                if (data['error']) {
+                    showErrorToast(data['error']);
+                    return;
+                }
+                joinGame(navigate, data['gameId'], data['username'], data['deckname'], showErrorToast);
+            }
+            );
+    }
+
+    return (
+        <Button variant="contained" color="primary" onClick={rematch}>
+            Rematch
+        </Button>
+    );
+}
+
 function RightAlignedButtons({ navigate, playerNum, showLog, setShowLog, showLastTurn, setShowLastTurn, setHowToPlayOpen, gameId }) {
     return (
         <Grid container direction="row" spacing={2} style={{ marginRight: '20px' }}>
@@ -458,11 +496,13 @@ function RightAlignedButtons({ navigate, playerNum, showLog, setShowLog, showLas
                     Copy GameId
                 </Button>
             </Grid>}
-
             <Grid item>
                 <Button variant="contained" color="primary" onClick={() => navigate('/')}>
                     Home
                 </Button>
+            </Grid>
+            <Grid item>
+                <RematchButton navigate={navigate} gameId={gameId} playerNum={playerNum} />
             </Grid>
         </Grid>
     );

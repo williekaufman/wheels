@@ -55,7 +55,7 @@ class Wheel():
         if active is not None:
             self.active = active
         else:
-            self.spin()
+            self.active = random.randint(0, 9)
         
     def play(self, card):
         if self.hero.element not in card.elements:
@@ -67,7 +67,7 @@ class Wheel():
         return False
 
     def spin(self):
-        self.active = random.randint(0, 9)
+        self.active = random.choice([i for i in range(10) if i != self.active])
         
     def to_json(self):
         return {
