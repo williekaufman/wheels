@@ -456,7 +456,7 @@ function joinGame(navigate, gameId, username, deckname, showErrorToast) {
         );
 }
 
-function RematchButton({ navigate, gameId, playerNum, showErrorToast }) {
+function RematchButton({ navigate, gameId, playerNum, result, showErrorToast }) {
     function rematch() {
         fetchWrapper(`${URL}/rematch`, { 'gameId': gameId, 'player': playerNum }, 'GET')
             .then((res) => res.json())
@@ -471,13 +471,13 @@ function RematchButton({ navigate, gameId, playerNum, showErrorToast }) {
     }
 
     return (
-        <Button variant="contained" color="primary" onClick={rematch}>
+        <Button disabled={result} variant="contained" color="primary" onClick={rematch}>
             Rematch
         </Button>
     );
 }
 
-function RightAlignedButtons({ navigate, playerNum, showLog, setShowLog, showLastTurn, setShowLastTurn, setHowToPlayOpen, gameId }) {
+function RightAlignedButtons({ navigate, playerNum, showLog, setShowLog, showLastTurn, setShowLastTurn, setHowToPlayOpen, gameId, result }) {
     return (
         <Grid container direction="row" spacing={2} style={{ marginRight: '20px' }}>
             <Grid item> <Button variant="contained" onClick={() => setHowToPlayOpen(true)}>Documentation</Button> </Grid>
@@ -502,7 +502,7 @@ function RightAlignedButtons({ navigate, playerNum, showLog, setShowLog, showLas
                 </Button>
             </Grid>
             <Grid item>
-                <RematchButton navigate={navigate} gameId={gameId} playerNum={playerNum} />
+                <RematchButton navigate={navigate} gameId={gameId} result={result} playerNum={playerNum} />
             </Grid>
         </Grid>
     );
@@ -647,6 +647,7 @@ export default function GamePage() {
                         setShowLastTurn={setShowLastTurn}
                         showErrorToast={showErrorToast}
                         setHowToPlayOpen={setHowToPlayOpen}
+                        result={result}
                         gameId={gameId} />
                 </Grid>
             </Grid >
