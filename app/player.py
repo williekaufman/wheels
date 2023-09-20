@@ -68,6 +68,15 @@ def fresh_state():
         'spins': 3,
     }
 
+def fresh_permanent_state():
+    return {
+        'rand': random.random(),
+        'life': 20,
+        'mana': 0,
+        'experience': 0,
+        'focus': 0,
+    }
+
 class Player():
     def __init__(
         self, 
@@ -75,44 +84,39 @@ class Player():
         wheels, 
         username, 
         hand=[], 
-        permanent_state={
-            'life': 20,
-            'mana': 0,
-            'experience': 0,
-            'focus': 0,
-            }, 
-        state=fresh_state()):
+        permanent_state=None,
+        state=None):
         deck = [card for card in deck]
         random.shuffle(deck)
         self.deck = deck
         self.hand = [card for card in hand]
         self.wheels = wheels.copy()
-        self.permament_state = permanent_state
-        self.state = state
+        self.permanent_state = permanent_state or fresh_permanent_state()
+        self.state = state or fresh_state()
         self.username = username
 
     def get(self, key):
         if self.state.get(key) is not None:
             return self.state[key]
-        return self.permament_state.get(key) or 0
+        return self.permanent_state.get(key) or 0
     
     def set(self, key, value):
         if self.state.get(key) is not None:
             self.state[key] = value
         else:
-            self.permament_state[key] = value
+            self.permanent_state[key] = value
     
     def add(self, key, value):
         if self.state.get(key) is not None:
             self.state[key] += value
         else:
-            self.permament_state[key] += value
+            self.permanent_state[key] += value
             
     def add_nonnegative(self, key, value):
         if self.state.get(key) is not None:
             self.state[key] = max(0, self.state[key] + value)
         else:
-            self.permament_state[key] = max(0, self.permament_state[key] + value)
+            self.permanent_state[key] = max(0, self.permanent_state[key] + value)
     
     def diff(self, other):
         return {
@@ -129,7 +133,7 @@ class Player():
             "wheels": {e.value: wheel.to_json() for e, wheel in self.wheels.items()},
             "username": self.username,
             "state": self.state,
-            "permanentState": self.permament_state,
+            "permanentState": self.permanent_state,
         }
         
     def of_json(json):
@@ -158,7 +162,7 @@ class Player():
             wheel.hero.start_of_game and wheel.hero.start_of_game(self)
       
     def new_turn(self, first_turn=False):
-        self.permament_state['mana'] += self.get('focus')
+        self.permanent_state['mana'] += self.get('focus')
         self.state = fresh_state()
         self.state['spins'] = 3 + self.get('experience') 
         self.draw()
@@ -179,7 +183,7 @@ class Player():
         if self.state.get(key) is not None:
             self.state[key] += amount
         else:
-            self.permament_state[key] += amount
+            self.permanent_state[key] += amount
 
     def take_damage(self, amount):
         amount = max(0, amount - self.get('damage_reduction'))

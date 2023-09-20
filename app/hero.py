@@ -44,7 +44,6 @@ def make_every_turn(params):
     return lambda player: every_turn(player, params)
 
 def start_of_game(player, params):
-    print(player, params)
     for key, value in params:
         player.add_nonnegative(key, value)
         

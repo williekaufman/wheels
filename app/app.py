@@ -147,7 +147,8 @@ def player_two():
         return { "error": "Invalid game id" }
     if get_player(PlayerNumber.TWO, game_id) is not None:
         return { "error": "Game already full" }
-    player = Player([Card.of_json(card) for card in deck], starting_wheels(heroes), username)
+    deck = [Card.of_json(card) for card in deck]
+    player = Player(deck, starting_wheels(heroes), username)
     player.start_of_game()
     player.new_turn(True)
     set_player(player, PlayerNumber.TWO, game_id)
