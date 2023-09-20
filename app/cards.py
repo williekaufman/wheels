@@ -27,7 +27,7 @@ air_spells = [
         "Inner Peace",
         [Effect(EffectType.MANA, 4), Effect(EffectType.FOCUS, 1), Effect(EffectType.SPELL_DAMAGE, 2)],
         [Element.AIR]
-    )
+    ),
 ]
 
 fire_spells = [
@@ -71,6 +71,12 @@ fire_spells = [
         2,
         "Fiery Passion",
         [Effect(EffectType.HEAL, -3), Effect(EffectType.MANA, 10)],
+        [Element.FIRE],
+    ),
+    Card(
+        5,
+        "Cauterize",
+        [Effect(EffectType.HEAL, 3), Effect(EffectType.EXPERIENCE, 1)],
         [Element.FIRE],
     )
 ]
@@ -239,19 +245,19 @@ exp_spells = [
 
 draw_spells = [
     Card(
-        2, 
+        1, 
         "Research",
         [Effect(EffectType.DRAW, 1)],
         all_elements
     ),
     Card(
-        4,
+        2,
         "Meditate",
         [Effect(EffectType.DRAW, 2)],
         all_elements
     ),
         Card(
-        6,
+        3,
         "Concentrate",
         [Effect(EffectType.DRAW, 3)],
         all_elements
@@ -267,7 +273,7 @@ neutral_spells = [
         all_elements
     ),
     Card(
-        5,
+        4,
         "Elemental Blast",
         [Effect(EffectType.DAMAGE, 2)],
         all_elements
