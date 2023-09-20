@@ -471,7 +471,7 @@ function RematchButton({ navigate, gameId, playerNum, result, showErrorToast }) 
     }
 
     return (
-        <Button disabled={!result} variant="contained" color="primary" onClick={rematch}>
+        <Button variant="contained" color="primary" onClick={rematch}>
             Rematch
         </Button>
     );
