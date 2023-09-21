@@ -492,6 +492,12 @@ export default function CardsPage() {
                         onChange={(e) => setDeckname(e.target.value)}
                         style={{ marginLeft: '10px' }}
                     />
+                    <label style={{ marginLeft: '10px' }}>Play against Jeeves</label>
+                    <input type="checkbox"
+                        value={ai}
+                        onChange={(e) => setAi(e.target.checked)}
+                        style={{ marginLeft: '10px' }}
+                    />
                     <input
                         type="text"
                         value={cardnameFilter}
@@ -499,13 +505,7 @@ export default function CardsPage() {
                         onChange={(e) => setCardnameFilter(e.target.value)}
                         style={{ marginLeft: '10px' }}
                     />
-                    <label style={{ marginLeft: '10px' }}>Play against Jeeves</label>
-                    <input type="checkbox"
-                        value={ai}
-                        onChange={(e) => setAi(e.target.checked)}
-                        style={{ marginLeft: '10px' }}
-                    />
-                    <label style={{ marginLeft: '10px' }}>Element Filter:</label>
+                   <label style={{ marginLeft: '10px' }}>Element Filter:</label>
                     <select
                         style={{ marginLeft: '10px' }}
                         value={elementFilter}
