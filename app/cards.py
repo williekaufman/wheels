@@ -2,6 +2,7 @@ from card import Card, Wheel
 from effect import Effect, EffectType
 from element import Element
 from local_settings import LOCAL
+from hero import heroes, default_heroes
 
 air_spells = [
     Card(
@@ -111,6 +112,12 @@ earth_spells = [
         "Trip",
         [Effect(EffectType.SPELL_DAMAGE, 2)],
         [Element.EARTH]
+    ),
+    Card(
+        3,
+        "Overextend",
+        [Effect(EffectType.MANA, 8), Effect(EffectType.DAMAGE_REDUCTION, -2)],
+        [Element.EARTH]
     )
 ]
 
@@ -129,7 +136,7 @@ water_spells = [
         [Element.WATER]
     ),
     Card(
-        3,
+        2,
         "Scrying",
         [Effect(EffectType.DRAW, 1), Effect(EffectType.EXPERIENCE, 1)],
         [Element.WATER] 
@@ -137,7 +144,7 @@ water_spells = [
     Card(
         0,
         "Splash",
-        [Effect(EffectType.DAMAGE, 0)],
+        [Effect(EffectType.DAMAGE, 0), Effect(EffectType.DAMAGE, 0)],
         [Element.WATER]
     ),
 ]
@@ -295,17 +302,86 @@ neutral_spells = [
 def default_cards():
     return air_spells + earth_spells + fire_spells + water_spells + two_color_spells + neutral_spells + exp_spells + mana_spells + draw_spells
 
+def cards_by_name():
+    return {card.name: card for card in cards()}
+
 def cards():
     if LOCAL:
         # return mana_spells
         pass
     return default_cards()
 
+def big_mana():
+    cards = cards_by_name()
+    return mana_spells * 3 + draw_spells * 2 + [
+        cards['Firestorm'],
+        cards['Firestorm'],
+        cards['Firestorm'],
+        cards['Conflagration'],
+        cards['Conflagration'],
+        cards['Earth Cocoon'],
+        cards['Earth Cocoon'],
+        cards['Scrying'],
+        cards['Scrying'],
+        cards['Mending'],
+        cards['Mending'],
+        cards['Inner Peace'],
+        cards['Inner Peace'], 
+    ] * 2, make_heroes({
+        Element.AIR: 'Aang',
+        Element.WATER: 'Katara',
+        })
     
+def burn():
+    cards = cards_by_name()
+    return mana_spells + [
+        cards['Overextend'],
+        cards['Overextend'],
+        cards['Fiery Passion'],
+        cards['Fiery Passion'],
+        cards['All Out Attack'],
+        cards['All Out Attack'],
+        cards['Firestorm'],
+        cards['Firestorm'],
+        cards['Firestorm'],
+        cards['Inner Peace'],
+        cards['Inner Peace'], 
+    ] * 2, make_heroes({
+        Element.FIRE: 'Zuko',
+        Element.AIR: 'Aang',
+        })
+
+def spell_damage():
+    cards = cards_by_name()
+    return mana_spells * 2 + draw_spells + [
+        cards['Inner Peace'],
+        cards['Inner Peace'],
+        cards['Inner Peace'],
+        cards['Inner Peace'],
+        cards['Trip'],
+        cards['Trip'],
+        cards['Sanctuary'],
+        cards['Sanctuary'],
+        cards['Inner Fire'],
+        cards['Inner Fire'],
+        cards['Splash'],
+        cards['Splash'],
+        cards['Splash'],
+        cards['Splash'],
+        cards['Splash'],
+        cards['Splash'],
+    ], make_heroes({
+        Element.FIRE: 'Iroh',
+    })
+
+def make_heroes(config={}):
+    return {
+        e: heroes.get(config.get(e)) or default_heroes[e] for e in Element
+    }
+
 def starter_decks():
     return {
-        "air": air_spells + mana_spells + exp_spells + draw_spells,
-        "earth": earth_spells + mana_spells + exp_spells + draw_spells,
-        "fire": fire_spells + mana_spells + exp_spells + draw_spells,
-        "water": water_spells + mana_spells + exp_spells + draw_spells,
+        "big mana": big_mana(),
+        "burn": burn(),
+        "spell damage": spell_damage(),
     } 

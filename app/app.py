@@ -95,12 +95,14 @@ def remove_deck(username, deckname):
     
 def get_deck(username, deckname):
     if (starter_deck := starter_decks().get(deckname)):
-        return [Card.to_json(card) for card in starter_deck]
+        return [Card.to_json(card) for card in starter_deck[0]]
     return rget_json(f"decks:{username}:{deckname}")
 
 def get_heroes(username, deckname):
     if (custom_heroes := rget_json(f"heroes:{username}:{deckname}")):
         return {Element(k): heroes[v] for k, v in custom_heroes.items()}
+    if (starter_deck := starter_decks().get(deckname)):
+        return starter_deck[1]
     return default_heroes
 
 def get_all_decks(username):

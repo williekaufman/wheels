@@ -522,7 +522,7 @@ export default function CardsPage() {
                         </Grid> <Grid item>
                             <Button disabled={modalOpen || !deckname || decks.every(deck => deck !== deckname)} variant="contained" onClick={() => deleteDeck(deckname, setDeckname, username, setDeck, setDecks, showErrorToast)}>Delete</Button>
                         </Grid> <Grid item>
-                            <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => { submit(deck, heroesArg, username, deckname, setDecks, showErrorToast); newGame(navigate, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
+                            <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => { submit(deck, heroesArg, username, deckname, setDecks, (e) => null); newGame(navigate, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
                         </Grid> <Grid item>
                             <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => { setJoinModalOpen(true) }}>{deckname ? `Join Game With ${deckname}` : 'Name deck to use'}</Button>
                         </Grid>
