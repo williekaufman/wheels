@@ -7,7 +7,7 @@ def play_hand(player):
         num_cards = {e: len([c for c in player.wheels[e].cards if c]) for e in Element}
         card = player.hand[i]
         element = sorted(card.elements, key=lambda e: num_cards[e])[0]
-        player.play(element, 0)  
+        player.play(element, i)  
 
 def should_lock(player, wheel):
     scores = [score(player, card) for card in wheel.cards]
