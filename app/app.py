@@ -11,6 +11,7 @@ from engineio.payload import Payload
 from player import Player, PlayerNumber, handle_turn, Result
 from element import Element
 from hero import default_heroes, heroes
+from bot import take_ai_turn
 from card import starting_wheels, Card
 from cards import cards, starter_decks
 
@@ -138,6 +139,7 @@ def player_two():
     game_id = request.json.get('gameId') or new_game_id()
     username = request.json.get('username')
     deckname = request.json.get('deckname')
+    ai = request.json.get('ai')
     deck = get_deck(username, deckname)
     heroes = get_heroes(username, deckname)
     if deck is None:
@@ -153,6 +155,13 @@ def player_two():
     player.start_of_game()
     player.new_turn(True)
     set_player(player, player_num, game_id)
+    if ai:
+        player = Player(deck, starting_wheels(heroes), 'Jeeves')
+        player.start_of_game()
+        player.new_turn(True)
+        set_player(player, player_num.other(), game_id)
+        print('ai opponent')
+        rset('ai', 'true', game_id=game_id)
     socketio.emit('update', {'gameId': game_id})
     rematch_params = {
         'username': username,
@@ -241,6 +250,7 @@ def play():
 @app.route("/submit", methods=['POST'])
 @api_endpoint
 def submit():
+    print('submitting')
     game_id = request.json.get("gameId")
     try:
         player_num = PlayerNumber(request.json.get("player"))
@@ -252,6 +262,9 @@ def submit():
     opponent = player_one if player_num == PlayerNumber.TWO else player_two
     if player is None:
         return make_response(jsonify({"error": "Invalid player"}), 400)
+    if rget('ai', game_id=game_id):
+        take_ai_turn(opponent)
+        set_submitted(player_num.other(), game_id) 
     if get_submitted(player_num.other(), game_id):
         log = get_log(game_id)
         player_one_copy = get_player(PlayerNumber.ONE, game_id)

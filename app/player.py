@@ -37,13 +37,13 @@ def handle_turn(player, opponent):
             args = [opponent, player]
             r = True
         card, log = resolve_wheel(*args, element)
-        card['player'] = 'playerOne' if r else 'playerTwo'
+        card['player'] = 'playerTwo' if r else 'playerOne'
         card['log'] = log
         cards.append(card)
         logs.append(log)
         card, log = resolve_wheel(*reversed(args), element)
         cards.append(card)
-        card['player'] = 'playerTwo' if r else 'playerOne'
+        card['player'] = 'playerOne' if r else 'playerTwo'
         card['log'] = log
         logs.append(log)
         if (result := check_game_over(player, opponent)):

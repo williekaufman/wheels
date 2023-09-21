@@ -82,7 +82,9 @@ class Effect():
             for i in range(self.value):
                 player.draw()
             return f"Drew {self.value}{'' if self.value == 1 else 's'} cards"
-            
+        
+    def worth(self):
+        return self.type.worth() * self.value          
    
 class EffectType(Enum):
     HEAL = "heal"
@@ -106,4 +108,17 @@ class EffectType(Enum):
             EffectType.EXPERIENCE: 6,
             EffectType.DRAW: 7,
             EffectType.FOCUS: 8,
+        }[self]
+
+    def worth(self):
+        return {
+            EffectType.SPELL_DAMAGE: 1,
+            EffectType.DAMAGE: 1.5,
+            EffectType.HEAL: 1.5,
+            EffectType.DAMAGE_REDUCTION: 1,
+            EffectType.BLOCK: .8,
+            EffectType.MANA: 1,
+            EffectType.EXPERIENCE: 1.5,
+            EffectType.DRAW: 2.5,
+            EffectType.FOCUS: 3,
         }[self]
