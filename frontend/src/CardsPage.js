@@ -492,13 +492,7 @@ export default function CardsPage() {
                         onChange={(e) => setDeckname(e.target.value)}
                         style={{ marginLeft: '10px' }}
                     />
-                    <label style={{ marginLeft: '10px' }}>Play against Jeeves</label>
-                    <input type="checkbox"
-                        value={ai}
-                        onChange={(e) => setAi(e.target.checked)}
-                        style={{ marginLeft: '10px' }}
-                    />
-                    <input
+                   <input
                         type="text"
                         value={cardnameFilter}
                         placeholder="Card name filter"
@@ -533,6 +527,13 @@ export default function CardsPage() {
                             <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => { submit(deck, heroesArg, username, deckname, setDecks, (e) => null); newGame(navigate, ai, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
                         </Grid> <Grid item>
                             <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => { setJoinModalOpen(true) }}>{deckname ? `Join Game With ${deckname}` : 'Name deck to use'}</Button>
+                        </Grid> <Grid item>
+                                <label style={{ marginLeft: '10px' }}>Play against Jeeves</label>
+                                <input type="checkbox"
+                                    value={ai}
+                                    onChange={(e) => setAi(e.target.checked)}
+                                    style={{ marginLeft: '10px' }}
+                                />
                         </Grid>
                     </Grid>
                     </Paper>
