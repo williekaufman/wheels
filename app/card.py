@@ -94,63 +94,52 @@ class Wheel():
                 "reason": "No card"
             }, 'Empty card'
         
-def channel(name="Channel"):
-    return Card(0, name, [Effect(EffectType.MANA, 1)], [])
+class BasicCard(Enum):
+    MANA = 'mana'
+    DAMAGE = 'damage'
+    BLOCK = 'block'
 
-def fireblast(name="Fireblast"):
-    return Card(0, name, [Effect(EffectType.DAMAGE, 1)], [])
-
-def shield(name="Shield"):
-    return Card(0, name, [Effect(EffectType.BLOCK, 2)], [])
-
-# function so we get a fresh card, not a reference to the same card
-def basic_cards():
-    return {
-        "channel": Card(0, "Channel", [Effect(EffectType.MANA, 1)], []),
-        "fireblast": Card(0, "Fireblast", [Effect(EffectType.DAMAGE, 1)], []),
-        "shield": Card(0, "Shield", [Effect(EffectType.BLOCK, 2)], [])    
-    }
-    
-def starting_template(config):
-    return [
-        channel(config['channel']),
-        channel(config['channel']),
-        channel(config['channel']),
-        fireblast(config['fireblast']),
-        shield(config['shield']),
-        None,
-        None,
-        None,
-        None,
-        None        
-    ]
+    def effect(self):
+        return {
+            BasicCard.MANA: Effect(EffectType.MANA, 1),
+            BasicCard.DAMAGE: Effect(EffectType.DAMAGE, 1),
+            BasicCard.BLOCK: Effect(EffectType.BLOCK, 2)
+        }[self]
+         
+    def make(self, name, element):
+        name = name or self.value()
+        return Card(0, name, [self.effect()], [element]) 
 
 configs = {
     Element.AIR: {
-        'channel': 'Spirit',
-        'fireblast': 'Air Blast',
-        'shield': 'Wind Wall'
+        BasicCard.MANA: ('Spirit', 4),
+        BasicCard.BLOCK: ('Wind Wall', 1)
     },
     Element.EARTH: {
-        'channel': 'Vitalize',
-        'fireblast': 'Rock Throw',
-        'shield': 'Earth Wall'
+        BasicCard.MANA: ('Vitalize', 2),
+        BasicCard.DAMAGE: ('Rock Throw', 1),
+        BasicCard.BLOCK: ('Earth Wall', 2)
     },
     Element.FIRE: {
-        'channel': 'Inflame',
-        'fireblast': 'Singe',
-        'shield': 'Fire Wall'
+        BasicCard.MANA: ('Inflame', 2),
+        BasicCard.DAMAGE: ('Singe', 3)
     },
     Element.WATER: {
-        'channel': 'Reservoir',
-        'fireblast': 'Water Jet',
-        'shield': 'Water Wall'
+        BasicCard.MANA: ('Reservoir', 3),
+        BasicCard.DAMAGE: ('Water Jet', 2),
     }
 }
+
+def make_starting_cards(element):
+    ret = []
+    config = configs[element]
+    for basic_card, (name, number) in config.items():
+        ret += [basic_card.make(name, element)] * number
+    return ret + [None] * (10 - len(ret))
     
 def starting_cards():
     return {
-        element: starting_template(configs[element]) for element in Element
+        element: make_starting_cards(element) for element in Element
     }
 
 def starting_wheels(heroes):
