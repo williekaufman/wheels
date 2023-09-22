@@ -341,7 +341,7 @@ export default function CardsPage() {
     };
 
     useEffect(() => {
-        getDecks(username, setDecks);
+        getDecks(username, setDecks, (e) => null);
 
         const interval = setInterval(() => {
             getDecks(username, setDecks, showErrorToast);

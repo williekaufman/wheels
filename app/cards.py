@@ -39,19 +39,19 @@ fire_spells = [
         [Element.FIRE],
     ),
     Card(
-        4,
+        5,
         "Fireblast",
         [Effect(EffectType.DAMAGE, 1), Effect(EffectType.DAMAGE, 1)],
         [Element.FIRE],
     ),
     Card(
-        6,
+        8,
         "Firestorm",
         [Effect(EffectType.DAMAGE, 1), Effect(EffectType.DAMAGE, 1), Effect(EffectType.DAMAGE, 1)],
         [Element.FIRE], 
     ),
     Card(
-        10,
+        12,
         "Conflagration",
         [Effect(EffectType.DAMAGE, 2), Effect(EffectType.DAMAGE, 2), Effect(EffectType.DAMAGE, 2)],
         [Element.FIRE],
@@ -69,7 +69,7 @@ fire_spells = [
         [Element.FIRE]
     ),
     Card(
-        2,
+        3,
         "Fiery Passion",
         [Effect(EffectType.HEAL, -3), Effect(EffectType.MANA, 10)],
         [Element.FIRE],

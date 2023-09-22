@@ -128,7 +128,6 @@ def rematch_params():
     if player_num == PlayerNumber.ONE:
         rematch_params = rget_json(f'rematch:{PlayerNumber.ONE.value}', game_id=game_id)
     else:
-        print('p2')
         rematch_params = rget_json(f'rematch:{PlayerNumber.TWO.value}', game_id=game_id)
     rematch_params['gameId'] = rget('rematch:game_id', game_id=game_id)
     return jsonify(rematch_params)
@@ -156,11 +155,10 @@ def player_two():
     player.new_turn(True)
     set_player(player, player_num, game_id)
     if ai:
-        player = Player(deck, starting_wheels(heroes), 'Jeeves')
-        player.start_of_game()
-        player.new_turn(True)
-        set_player(player, player_num.other(), game_id)
-        print('ai opponent')
+        ai = Player(deck, starting_wheels(heroes), 'Jeeves')
+        ai.start_of_game()
+        ai.new_turn(True)
+        set_player(ai, player_num.other(), game_id)
         rset('ai', 'true', game_id=game_id)
     socketio.emit('update', {'gameId': game_id})
     rematch_params = {
@@ -250,7 +248,6 @@ def play():
 @app.route("/submit", methods=['POST'])
 @api_endpoint
 def submit():
-    print('submitting')
     game_id = request.json.get("gameId")
     try:
         player_num = PlayerNumber(request.json.get("player"))

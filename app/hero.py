@@ -60,8 +60,8 @@ air_heroes = [
     Hero(
         name="Aang",
         element=Element.AIR,
-        description='''Spells: -1 (Mana) cost +1 (Heal) -1 (Damage)''',
-        adjust_card=make_adjust(-1, [(EffectType.HEAL, 1), (EffectType.DAMAGE, -1)]),
+        description='''Spells: -1 (Mana) cost +1 (Block) -1 (Damage)''',
+        adjust_card=make_adjust(-1, [(EffectType.BLOCK, 1), (EffectType.DAMAGE, -1)]),
     )
 ]
 
