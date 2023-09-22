@@ -118,7 +118,7 @@ water_heroes = [
         element=Element.WATER,
         description='''Start of game: +1 (Focus) 
         Spells: -1 (Damage)''',
-        adjust_card=make_adjust(0, [(EffectType.DAMAGE, 1)]),
+        adjust_card=make_adjust(0, [(EffectType.DAMAGE, -1)]),
         start_of_game=make_start_of_game([('focus', 1)])
     ),
 ]
