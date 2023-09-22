@@ -21,13 +21,14 @@ def resolve_wheel(player, opponent, element):
     time = datetime.datetime.now().strftime("%H:%M:%S")
     return card, f'{time}:{player.username}:{element.value}:{log}'
 
-
 def check_game_over(player, opponent):
     if player.get('life') <= 0:
         return Result.TIE if opponent.get('life') <= 0 else Result.PLAYER_TWO
     return Result.PLAYER_ONE if opponent.get('life') <= 0 else None
 
 def handle_turn(player, opponent):
+    player_copy = player.copy()
+    opponent_copy = opponent.copy()
     logs = []
     cards = []
     for element in Element:
@@ -39,12 +40,16 @@ def handle_turn(player, opponent):
         card, log = resolve_wheel(*args, element)
         card['player'] = 'playerTwo' if r else 'playerOne'
         card['log'] = log
+        card['player1Diff'] = player.diff(player_copy)
+        card['player2Diff'] = opponent.diff(opponent_copy)
         cards.append(card)
         logs.append(log)
         card, log = resolve_wheel(*reversed(args), element)
-        cards.append(card)
         card['player'] = 'playerOne' if r else 'playerTwo'
         card['log'] = log
+        card['player1Diff'] = player.diff(player_copy)
+        card['player2Diff'] = opponent.diff(opponent_copy)
+        cards.append(card)
         logs.append(log)
         if (result := check_game_over(player, opponent)):
             logs.append(result.to_description())
@@ -105,7 +110,7 @@ class Player():
             self.state[key] = value
         else:
             self.permanent_state[key] = value
-    
+
     def add(self, key, value):
         if self.state.get(key) is not None:
             self.state[key] += value
@@ -117,14 +122,19 @@ class Player():
             self.state[key] = max(0, self.state[key] + value)
         else:
             self.permanent_state[key] = max(0, self.permanent_state[key] + value)
-    
+
+    def copy(self):
+        return Player(
+            deck=self.deck,
+            hand=self.hand,
+            wheels=self.wheels,
+            username=self.username,
+            permanent_state=self.permanent_state.copy(),
+            state=self.state.copy()
+        )
+
     def diff(self, other):
-        return {
-            'life': self.get('life') - other.get('life'),
-            'mana': self.get('mana') - other.get('mana'),
-            'focus': self.get('focus') - other.get('focus'),
-            'experience': self.get('experience') - other.get('experience'),
-        }
+        return {stat: self.get(stat) - other.get(stat) for stat in ['life', 'mana', 'focus', 'experience']}
    
     def to_json(self):
         return {

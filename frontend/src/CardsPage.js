@@ -61,6 +61,7 @@ function getDecks(username, setDecks, showErrorToast) {
 
 
 function newGame(navigate, ai, username, deckname) {
+    console.log(username);
     return fetchWrapper(`${URL}/join_game`, { 'username': username, 'deckname': deckname, 'ai': ai }, 'POST')
         .then((res) => res.json())
         .then((data) => {

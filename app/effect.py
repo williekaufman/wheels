@@ -17,7 +17,10 @@ class Effect():
         self.type = type
         self.value = value
         self.synergy = synergy      
-       
+
+    def copy(self):
+        return Effect(self.type, self.value, self.synergy)
+
     def text(self):
         synergy_prefix = self.synergy.to_prefix()
         if self.type == EffectType.HEAL:

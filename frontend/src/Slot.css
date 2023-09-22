@@ -5,6 +5,7 @@
   padding: 10px;
   font-weight: bold;
   width: 250px;
+  height: 85px;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   background-color: #fff;
 }
@@ -19,7 +20,7 @@
 
 .slot.empty {
   background: gray;
-  height: initial;
+  /* height: initial; */
 }
 
 .slot.air {

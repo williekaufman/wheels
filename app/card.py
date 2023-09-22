@@ -28,7 +28,10 @@ class Card():
             'elements': [Element(element) for element in json['elements']]
         }
         return Card(**args)
-   
+
+    def copy(self):
+        return Card(self.mana_cost, self.name, [effect.copy() for effect in self.effects], self.elements)
+
     def text(self):
         return ' '.join([effect.text() for effect in self.effects])
    
@@ -56,7 +59,10 @@ class Wheel():
             self.active = active
         else:
             self.active = random.randint(0, 9)
-        
+
+    def copy(self):
+        return Wheel(self.hero, [card.copy() for card in self.cards], self.active)
+
     def play(self, card):
         if self.hero.element not in card.elements:
             return False
