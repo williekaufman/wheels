@@ -9,6 +9,11 @@ import Paper from '@mui/material/Paper';
 import { fetchWrapper } from './GamePage.js';
 import { useRef } from 'react';
 import HeroSelector from './HeroSelector.js';
+import Select from '@mui/material/Select';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import { findByLabelText } from '@testing-library/react';
 
 function addToDeck(card, deck, setDeck) {
     setDeck([...deck, card]);
@@ -104,20 +109,36 @@ function draftButtonDisabled(numChoices, decksize) {
 function JoinModal({ navigate, username, deckname, deck, heroesArg, setDecks, setJoinModalOpen, showErrorToast }) {
     let [gameId, setGameId] = useState('');
     let [opponentUsername, setOpponentUsername] = useState('');
+    let [friend, setFriend] = useState('');
+    let [friends, setFriends] = useState(JSON.parse(localStorage.getItem('spellbooks-friends')) || []);
+
+    const removeFriend = (friend) => {
+        let newFriends = friends.filter((f) => f !== friend);
+        localStorage.setItem('spellbooks-friends', JSON.stringify(newFriends));
+        setFriends(newFriends);
+    }
 
     useEffect(() => {
         const handleKeyDown = (event) => {
             if (event.key === 'Escape') {
                 setJoinModalOpen(false);
             } if (event.key === 'Enter') {
-                submit(deck, heroesArg, username, deckname, setDecks, (e) => null);
-                joinGame(navigate, gameId, opponentUsername, username, deckname, showErrorToast);
-                setJoinModalOpen(false);
+                if (addFriendRef.current) {
+                    let newFriends = [...friends, friend];
+                    localStorage.setItem('spellbooks-friends', JSON.stringify(newFriends));
+                    setFriends(newFriends);
+                    setOpponentUsername(friend);
+                    setFriend('');
+                } else {
+                    submit(deck, heroesArg, username, deckname, setDecks, (e) => null);
+                    joinGame(navigate, gameId, opponentUsername, username, deckname, showErrorToast);
+                    setJoinModalOpen(false);
+                }
             }
         };
 
         const handleClickOutside = (event) => {
-            if (modalRef.current && !modalRef.current.contains(event.target)) {
+            if (modalRef.current && !modalRef.current.contains(event.target) && !addFriendRef.current) {
                 setJoinModalOpen(false);
             }
         };
@@ -129,13 +150,13 @@ function JoinModal({ navigate, username, deckname, deck, heroesArg, setDecks, se
             document.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [setJoinModalOpen, gameId, opponentUsername]);
+    }, [setJoinModalOpen, gameId, opponentUsername, friend, friends]);
 
     const modalRef = useRef(null);
 
     const inputRef = useRef(null);
-
     const usernameRef = useRef(null);
+    const addFriendRef = useRef(null);
 
     useEffect(() => {
         if (inputRef.current) {
@@ -168,6 +189,45 @@ function JoinModal({ navigate, username, deckname, deck, heroesArg, setDecks, se
                         />
                     </label>
                 </div>
+                <div style={styles.inputGroup}>
+                    <label>
+                        Add Friend
+                        <input
+                            ref={addFriendRef}
+                            style={styles.input}
+                            value={friend}
+                            onChange={(e) => setFriend(e.target.value)}
+                        />
+                    </label>
+                </div>
+
+                <FormControl fullWidth>
+                    <InputLabel>Friends</InputLabel>
+                    <Select
+                        label="Friends"
+                        value={opponentUsername}
+                        onChange={(e) => setOpponentUsername(e.target.value)}
+                        style={{ marginBottom: '10px' }}
+                    >
+                        {friends.map((f, i) => (
+                            <MenuItem key={i} value={f}>{f}</MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                <FormControl fullWidth>
+                    <InputLabel>Remove Friends</InputLabel>
+                    <Select
+                        label="Remove Friends"
+                        value=''
+                        onChange={(e) => removeFriend(e.target.value)}
+                        style={{ marginBottom: '10px' }}
+                    >
+                        {friends.map((f, i) => (
+                            <MenuItem key={i} value={f}>{f}</MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+ 
                 <div>
                     <Grid container direction="row" justifyContent="space-between">
                         <Grid item>
@@ -293,8 +353,9 @@ const styles = {
     },
     inputGroup: {
         marginBottom: '10px',
-        zIndex: 10
-    },
+        zIndex: 10,
+        textAlign: 'right'
+   },
     input: {
         marginLeft: '10px',
         padding: '5px',
