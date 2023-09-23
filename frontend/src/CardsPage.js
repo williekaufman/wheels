@@ -385,7 +385,6 @@ export default function CardsPage() {
     const [waterHero, setWaterHero] = useState();
     const [earthHero, setEarthHero] = useState();
     const [airHero, setAirHero] = useState();
-    const [ai, setAi] = useState(false);
     const navigate = useNavigate();
 
     const setDeckFromName = (deckname) => {
@@ -542,7 +541,6 @@ export default function CardsPage() {
                 navigate={navigate}
                 setJoinModalOpen={setJoinModalOpen}
                 deck={deck}
-                ai={ai}
                 heroesArg={heroesArg}
                 setDecks={setDecks}
                 username={username}
@@ -601,17 +599,13 @@ export default function CardsPage() {
                             </Grid> <Grid item>
                                 <Button disabled={modalOpen || !deckname || decks.every(deck => deck !== deckname)} variant="contained" onClick={() => deleteDeck(deckname, setDeckname, username, setDeck, setDecks, showErrorToast)}>Delete</Button>
                             </Grid> <Grid item>
-                                <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => { submit(deck, heroesArg, username, deckname, setDecks, (e) => null); newGame(navigate, ai, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
+                                <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => { submit(deck, heroesArg, username, deckname, setDecks, (e) => null); newGame(navigate, false, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
                             </Grid> <Grid item>
                                 <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => { setJoinModalOpen(true) }}>{deckname ? `Join Game With ${deckname}` : 'Name deck to use'}</Button>
-                            </Grid> <Grid item>
-                                <label style={{ marginLeft: '10px' }}>Play against Jeeves</label>
-                                <input type="checkbox"
-                                    value={ai}
-                                    onChange={(e) => setAi(e.target.checked)}
-                                    style={{ marginLeft: '10px' }}
-                                />
-                            </Grid>
+                            </Grid> 
+                            <Grid item>
+                                <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => { submit(deck, heroesArg, username, deckname, setDecks, (e) => null); newGame(navigate, true, username, deckname) }}>{deckname ? `New Game against Jeeves with ${deckname}` : 'Name deck to use'}</Button>
+                            </Grid> 
                         </Grid>
                     </Paper>
                 </Grid>
