@@ -19,7 +19,7 @@ function removeFromDeck(index, deck, setDeck) {
 }
 
 function submit(deck, heroesArg, username, deckname, setDecks, showErrorToast) {
-    fetchWrapper(`${URL}/decks`, { 'deck': deck, 'username': username, 'deckname': deckname , 'heroes': heroesArg }, 'POST')
+    fetchWrapper(`${URL}/decks`, { 'deck': deck, 'username': username, 'deckname': deckname, 'heroes': heroesArg }, 'POST')
         .then((res) => res.json())
         .then((response) => {
             if (response['error']) {
@@ -75,11 +75,11 @@ function newGame(navigate, ai, username, deckname) {
         );
 }
 
-function joinGame(navigate, gameId, username, deckname, showErrorToast) {
-    if (!gameId) {
+function joinGame(navigate, gameId, opponentUsername, username, deckname, showErrorToast) {
+    if (!gameId && !opponentUsername) {
         return;
     }
-    return fetchWrapper(`${URL}/join_game`, { 'username': username, 'deckname': deckname, 'gameId': gameId }, 'POST')
+    return fetchWrapper(`${URL}/join_game`, { 'opponentUsername': opponentUsername, 'username': username, 'deckname': deckname, 'gameId': gameId }, 'POST')
         .then((res) => res.json())
         .then((data) => {
             if (data['error']) {
@@ -103,6 +103,7 @@ function draftButtonDisabled(numChoices, decksize) {
 
 function JoinModal({ navigate, username, deckname, deck, heroesArg, setDecks, setJoinModalOpen, showErrorToast }) {
     let [gameId, setGameId] = useState('');
+    let [opponentUsername, setOpponentUsername] = useState('');
 
     useEffect(() => {
         const handleKeyDown = (event) => {
@@ -110,7 +111,8 @@ function JoinModal({ navigate, username, deckname, deck, heroesArg, setDecks, se
                 setJoinModalOpen(false);
             } if (event.key === 'Enter') {
                 submit(deck, heroesArg, username, deckname, setDecks, (e) => null);
-                joinGame(navigate, gameId, username, deckname, showErrorToast);
+                joinGame(navigate, gameId, opponentUsername, username, deckname, showErrorToast);
+                setJoinModalOpen(false);
             }
         };
 
@@ -127,11 +129,13 @@ function JoinModal({ navigate, username, deckname, deck, heroesArg, setDecks, se
             document.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [setJoinModalOpen, gameId]);
+    }, [setJoinModalOpen, gameId, opponentUsername]);
 
     const modalRef = useRef(null);
 
     const inputRef = useRef(null);
+
+    const usernameRef = useRef(null);
 
     useEffect(() => {
         if (inputRef.current) {
@@ -153,6 +157,17 @@ function JoinModal({ navigate, username, deckname, deck, heroesArg, setDecks, se
                         />
                     </label>
                 </div>
+                <div style={styles.inputGroup}>
+                    <label>
+                        Opponent:
+                        <input
+                            ref={usernameRef}
+                            style={styles.input}
+                            value={opponentUsername}
+                            onChange={(e) => setOpponentUsername(e.target.value)}
+                        />
+                    </label>
+                </div>
                 <div>
                     <Grid container direction="row" justifyContent="space-between">
                         <Grid item>
@@ -165,7 +180,7 @@ function JoinModal({ navigate, username, deckname, deck, heroesArg, setDecks, se
                         </Grid>
                         <Grid item>
                             <Button
-                                onClick={() => { submit(deck, heroesArg, username, deckname, setDecks, (e) => null); joinGame(navigate, gameId, username, deckname, showErrorToast) }}
+                                onClick={() => { submit(deck, heroesArg, username, deckname, setDecks, (e) => null); joinGame(navigate, gameId, opponentUsername, username, deckname, showErrorToast); setJoinModalOpen(false); }}
                                 variant="contained"
                             >
                                 Submit
@@ -477,66 +492,66 @@ export default function CardsPage() {
             <Grid container direction="column" spacing={2} padding="10px">
                 <Grid item>
                     <Paper style={{ padding: '10px', backgroundColor: 'lightgray' }}>
-                    <input
-                        type="text"
-                        value={username}
-                        placeholder="username"
-                        onChange={(e) => {
-                            localStorage.setItem('spellbooks-username', e.target.value);
-                            setUsername(e.target.value)
-                        }}
-                    />
-                    <input
-                        type="text"
-                        value={deckname}
-                        placeholder="Deck name"
-                        onChange={(e) => setDeckname(e.target.value)}
-                        style={{ marginLeft: '10px' }}
-                    />
-                   <input
-                        type="text"
-                        value={cardnameFilter}
-                        placeholder="Card name filter"
-                        onChange={(e) => setCardnameFilter(e.target.value)}
-                        style={{ marginLeft: '10px' }}
-                    />
-                   <label style={{ marginLeft: '10px' }}>Element Filter:</label>
-                    <select
-                        style={{ marginLeft: '10px' }}
-                        value={elementFilter}
-                        onChange={(e) => setElementFilter(e.target.value)}
-                    >
-                        <option value="">Any</option>
-                        <option value="fire">Fire</option>
-                        <option value="water">Water</option>
-                        <option value="earth">Earth</option>
-                        <option value="air">Air</option>
-                        <option value="neutral">Neutral</option>
-                    </select>
-                    <Grid container direction="row" spacing={2} style={{ marginTop: '0px' }}>
-                        <Grid item>
-                            <Button disabled={modalOpen} variant="contained" onClick={() => setDraftingModalOpen(true)}>Draft</Button>
-                        </Grid>
-                        <Grid item>
-                            <Button disabled={modalOpen || !deck.length} variant="contained" onClick={() => setDeck([])}>Clear Deck</Button>
-                        </Grid>
-                        <Grid item>
-                            <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => submit(deck, heroesArg, username, deckname, setDecks, showErrorToast)}>Submit</Button>
-                        </Grid> <Grid item>
-                            <Button disabled={modalOpen || !deckname || decks.every(deck => deck !== deckname)} variant="contained" onClick={() => deleteDeck(deckname, setDeckname, username, setDeck, setDecks, showErrorToast)}>Delete</Button>
-                        </Grid> <Grid item>
-                            <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => { submit(deck, heroesArg, username, deckname, setDecks, (e) => null); newGame(navigate, ai, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
-                        </Grid> <Grid item>
-                            <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => { setJoinModalOpen(true) }}>{deckname ? `Join Game With ${deckname}` : 'Name deck to use'}</Button>
-                        </Grid> <Grid item>
+                        <input
+                            type="text"
+                            value={username}
+                            placeholder="username"
+                            onChange={(e) => {
+                                localStorage.setItem('spellbooks-username', e.target.value);
+                                setUsername(e.target.value)
+                            }}
+                        />
+                        <input
+                            type="text"
+                            value={deckname}
+                            placeholder="Deck name"
+                            onChange={(e) => setDeckname(e.target.value)}
+                            style={{ marginLeft: '10px' }}
+                        />
+                        <input
+                            type="text"
+                            value={cardnameFilter}
+                            placeholder="Card name filter"
+                            onChange={(e) => setCardnameFilter(e.target.value)}
+                            style={{ marginLeft: '10px' }}
+                        />
+                        <label style={{ marginLeft: '10px' }}>Element Filter:</label>
+                        <select
+                            style={{ marginLeft: '10px' }}
+                            value={elementFilter}
+                            onChange={(e) => setElementFilter(e.target.value)}
+                        >
+                            <option value="">Any</option>
+                            <option value="fire">Fire</option>
+                            <option value="water">Water</option>
+                            <option value="earth">Earth</option>
+                            <option value="air">Air</option>
+                            <option value="neutral">Neutral</option>
+                        </select>
+                        <Grid container direction="row" spacing={2} style={{ marginTop: '0px' }}>
+                            <Grid item>
+                                <Button disabled={modalOpen} variant="contained" onClick={() => setDraftingModalOpen(true)}>Draft</Button>
+                            </Grid>
+                            <Grid item>
+                                <Button disabled={modalOpen || !deck.length} variant="contained" onClick={() => setDeck([])}>Clear Deck</Button>
+                            </Grid>
+                            <Grid item>
+                                <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => submit(deck, heroesArg, username, deckname, setDecks, showErrorToast)}>Submit</Button>
+                            </Grid> <Grid item>
+                                <Button disabled={modalOpen || !deckname || decks.every(deck => deck !== deckname)} variant="contained" onClick={() => deleteDeck(deckname, setDeckname, username, setDeck, setDecks, showErrorToast)}>Delete</Button>
+                            </Grid> <Grid item>
+                                <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => { submit(deck, heroesArg, username, deckname, setDecks, (e) => null); newGame(navigate, ai, username, deckname) }}>{deckname ? `New Game with ${deckname}` : 'Name deck to use'}</Button>
+                            </Grid> <Grid item>
+                                <Button disabled={modalOpen || !deckname || !deck.length} variant="contained" onClick={() => { setJoinModalOpen(true) }}>{deckname ? `Join Game With ${deckname}` : 'Name deck to use'}</Button>
+                            </Grid> <Grid item>
                                 <label style={{ marginLeft: '10px' }}>Play against Jeeves</label>
                                 <input type="checkbox"
                                     value={ai}
                                     onChange={(e) => setAi(e.target.checked)}
                                     style={{ marginLeft: '10px' }}
                                 />
+                            </Grid>
                         </Grid>
-                    </Grid>
                     </Paper>
                 </Grid>
                 {decks.length !== 0 && <Grid item>

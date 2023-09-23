@@ -135,7 +135,12 @@ def rematch_params():
 @app.route("/join_game", methods=["POST"])
 @api_endpoint
 def player_two():
-    game_id = request.json.get('gameId') or new_game_id()
+    if (opponent_username := request.json.get('opponentUsername')):
+        game_id = rget('game_id', game_id=opponent_username)
+        if not game_id:
+            return { "error": "Unable to find game" }
+    else:
+        game_id = request.json.get('gameId') or new_game_id()
     username = request.json.get('username')
     deckname = request.json.get('deckname')
     ai = request.json.get('ai')
@@ -149,6 +154,8 @@ def player_two():
         player_num = PlayerNumber.TWO
     else:
         player_num = PlayerNumber.ONE
+    if player_num == PlayerNumber.ONE and username:
+        rset('game_id', game_id, game_id=username)
     deck = [Card.of_json(card) for card in deck]
     player = Player(deck, starting_wheels(heroes), username)
     player.start_of_game()
